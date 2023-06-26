@@ -13,88 +13,24 @@
  * Domain Path: /languages
  */
 
-// Add a shortcode to display the assistant form
-function chatgpt_assistant_shortcode($atts): string
+// Include the pages and other sections
+require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-settings.php';
+require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-message-page.php';
+require_once plugin_dir_path(__FILE__) . 'shortcode/chatgpt-assistant-shortcode.php';
+require_once plugin_dir_path(__FILE__) . 'chatgpt-assistant-menu.php';
+
+// Enqueue Bootstrap CSS and JavaScript files
+function chatgpt_assistant_enqueue_scripts(): void
 {
-    $output = '';
+    $plugin_directory = plugin_dir_url( __FILE__ );
 
-    // Check if the form is submitted
-    if (isset($_POST['chatgpt_assistant_submit'])) {
-        $message = sanitize_text_field($_POST['chatgpt_assistant_message']);
-
-        // Call the OpenAI API to generate a response
-        $response = chatgpt_assistant_generate_response($message);
-
-        // Display the response
-        $output .= '<div class="chatgpt-assistant-response">' . $response . '</div>';
-    }
-
-    // Display the assistant form
-    $output .= '
-        <form method="post" action="">
-            <label for="chatgpt_assistant_message">Enter your message:</label>
-            <input type="text" name="chatgpt_assistant_message" id="chatgpt_assistant_message" required>
-            <input type="submit" name="chatgpt_assistant_submit" value="Submit">
-        </form>
-    ';
-
-    return $output;
+    wp_enqueue_style('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css');
+    wp_enqueue_script('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js', array('jquery'), '4.5.0', true);
+    wp_enqueue_style('chatgpt-dashicon', $plugin_directory . 'src/img/chatgpt-dashicon.svg');
+    wp_enqueue_style('chatgp-assistant-admin-styles', $plugin_directory . 'src/css/style.css');
+    wp_enqueue_script('chatgp-assistant-admin-script', $plugin_directory . 'src/js/script.js');
 }
-add_shortcode('chatgpt-assistant', 'chatgpt_assistant_shortcode');
-
-// Add a menu item for the plugin settings
-function chatgpt_assistant_add_menu(): void
-{
-    add_menu_page(
-        'ChatGPT Assistant',
-        'ChatGPT Assistant',
-        'manage_options',
-        'chatgpt-assistant-settings',
-        'chatgpt_assistant_settings_page',
-        'dashicons-admin-generic'
-    );
-}
-add_action('admin_menu', 'chatgpt_assistant_add_menu');
-
-// Display the plugin settings page
-function chatgpt_assistant_settings_page(): void
-{
-    // Check if the user has permission to access the settings page
-    if (!current_user_can('manage_options')) {
-        wp_die('You do not have sufficient permissions to access this page.');
-    }
-
-    // Save the API key if the form is submitted
-    if (isset($_POST['chatgpt_assistant_submit'])) {
-        update_option('chatgpt_assistant_api_key', $_POST['chatgpt_assistant_api_key']);
-        echo '<div class="updated"><p>Settings saved.</p></div>';
-    }
-
-    // Display the settings form
-    ?>
-    <div class="wrap">
-        <h1>ChatGPT Assistant Settings</h1>
-        <form method="post" action="">
-            <?php settings_fields('chatgpt_assistant_settings'); ?>
-            <?php do_settings_sections('chatgpt_assistant_settings'); ?>
-            <table class="form-table">
-                <tr valign="top">
-                    <th scope="row">OpenAI API Key</th>
-                    <td><input type="text" name="chatgpt_assistant_api_key" value="<?php echo esc_attr(get_option('chatgpt_assistant_api_key')); ?>" /></td>
-                </tr>
-            </table>
-            <?php submit_button('Save Settings', 'primary', 'chatgpt_assistant_submit'); ?>
-        </form>
-    </div>
-    <?php
-}
-
-// Register the plugin settings
-function chatgpt_assistant_register_settings(): void
-{
-    register_setting('chatgpt_assistant_settings', 'chatgpt_assistant_api_key', 'sanitize_text_field');
-}
-add_action('admin_init', 'chatgpt_assistant_register_settings');
+add_action('admin_enqueue_scripts', 'chatgpt_assistant_enqueue_scripts');
 
 // Function to retrieve the API key from plugin settings
 function chatgpt_assistant_get_api_key() {
@@ -174,61 +110,10 @@ function chatgpt_assistant_generate_response($message): string {
     }
 }
 
-// Add a submenu item for the form
-function chatgpt_assistant_add_submenu(): void
-{
-    add_submenu_page(
-        'chatgpt-assistant-settings',
-        'ChatGPT Assistant Form',
-        'Message',
-        'manage_options',
-        'chatgpt-assistant-form',
-        'chatgpt_assistant_form_page'
-    );
-}
-add_action('admin_menu', 'chatgpt_assistant_add_submenu');
 
-// Display the form page
-function chatgpt_assistant_form_page(): void
-{
-    // Check if the user has permission to access the form page
-    if (!current_user_can('manage_options')) {
-        wp_die('You do not have sufficient permissions to access this page.');
-    }
 
-    // Handle form submission
-    if (isset($_POST['chatgpt_assistant_submit'])) {
-        $message = sanitize_text_field($_POST['chatgpt_assistant_message']);
 
-        // Generate response and publish as a post
-        $response = chatgpt_assistant_generate_response($message);
 
-        // Display success or error message
-        if (str_starts_with($response, 'Error')) {
-            $message_class = 'error';
-        } else {
-            $message_class = 'updated';
-        }
-
-        echo '<div class="' . $message_class . '"><p>' . $response . '</p></div>';
-    }
-
-    // Display the form
-    ?>
-    <div class="wrap">
-        <h1>ChatGPT Assistant Form</h1>
-        <form method="post" action="">
-            <table class="form-table">
-                <tr valign="top">
-                    <th scope="row">Message</th>
-                    <td><textarea name="chatgpt_assistant_message" rows="5" cols="50"></textarea></td>
-                </tr>
-            </table>
-            <?php submit_button('Submit', 'primary', 'chatgpt_assistant_submit'); ?>
-        </form>
-    </div>
-    <?php
-}
 
 
 
