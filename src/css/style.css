@@ -1,0 +1,5 @@
+.dashicons-chatgpt-dashicon::before {
+    content: url('../img/chatgpt-dashicon.svg');
+    width: 20px; /* Adjust the size as needed */
+    height: 20px; /* Adjust the size as needed */
+}
