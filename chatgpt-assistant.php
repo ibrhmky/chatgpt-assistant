@@ -22,29 +22,11 @@ require_once plugin_dir_path(__FILE__) . 'shortcode/chatgpt-assistant-shortcode.
 
 require_once plugin_dir_path(__FILE__) . 'chatgpt-assistant-menu.php';
 
-// Enqueue Bootstrap CSS and JavaScript files
-function chatgpt_assistant_enqueue_scripts(): void
-{
-    $plugin_directory = plugin_dir_url( __FILE__ );
-
-    wp_enqueue_style('chatgpt-dashicon', $plugin_directory . 'src/img/chatgpt-dashicon.svg');
-    wp_enqueue_style('chatgp-assistant-admin-styles', $plugin_directory . 'src/css/style.css');
-
-    wp_enqueue_script('chatgp-assistant-admin-script', $plugin_directory . 'src/js/script.js');
-    // Localize the script to pass data to JavaScript
-    wp_localize_script(
-        'chatgp-assistant-admin-script',
-        'chatgptAssistantData',
-        array(
-            'ajaxurl' => admin_url('admin-ajax.php'),
-        )
-    );
-}
-add_action('admin_enqueue_scripts', 'chatgpt_assistant_enqueue_scripts');
-
 // Enqueue Bootstrap assets for your plugin's pages
 function chatgpt_assistant_enqueue_assets(): void
 {
+    $plugin_directory = plugin_dir_url( __FILE__ );
+
     // Get the current screen object
     $screen = get_current_screen();
 
@@ -62,11 +44,41 @@ function chatgpt_assistant_enqueue_assets(): void
 
         // Enqueue Bootstrap JS
         wp_enqueue_script('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js', array('jquery'), '4.5.2');
+
+        wp_enqueue_script( 'jquery' );
+        wp_enqueue_script( 'datatables', 'https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js', array( 'jquery' ), '1.11.3' );
+        wp_enqueue_style( 'datatables', 'https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css', array(), '1.11.3' );
+
+        wp_enqueue_style('chatgpt-dashicon', $plugin_directory . 'src/img/chatgpt-dashicon.svg');
+        wp_enqueue_style('chatgp-assistant-admin-styles', $plugin_directory . 'src/css/style.css');
+
+        wp_enqueue_script('chatgp-assistant-admin-script', $plugin_directory . 'src/js/script.js');
     }
 }
 add_action('admin_enqueue_scripts', 'chatgpt_assistant_enqueue_assets');
 
+function chatgpt_assistant_create_table(): void
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'chatgpt_message_history';
 
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $table_name (
+        id INT(11) NOT NULL AUTO_INCREMENT,
+        title VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        post_id INT(11) NOT NULL,
+        date DATETIME NOT NULL,
+        word_count INT(11) NOT NULL,
+        raw_response TEXT NOT NULL,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+}
+register_activation_hook(__FILE__, 'chatgpt_assistant_create_table');
 
 // Function to retrieve the API key from plugin settings
 function chatgpt_assistant_get_api_key() {
@@ -74,7 +86,10 @@ function chatgpt_assistant_get_api_key() {
 }
 
 // Function to generate a response from ChatGPT and publish it as a post
-function chatgpt_assistant_generate_response($message): string {
+function chatgpt_assistant_generate_response(): void {
+    // Retrieve the message from the request
+    $message = isset($_POST['message']) ? sanitize_text_field($_POST['message']) : '';
+
     $api_key = chatgpt_assistant_get_api_key();
     $model_id = 'gpt-3.5-turbo';
 
@@ -112,7 +127,7 @@ function chatgpt_assistant_generate_response($message): string {
                 $error_message .= ' ' . $response_data['error']['message'];
             }
         }
-        return $error_message;
+        wp_send_json_error(array('error' => $error_message));
     }
 
     // Parse the API response
@@ -138,14 +153,34 @@ function chatgpt_assistant_generate_response($message): string {
 
     $post_id = wp_insert_post($post_data);
 
+    global $wpdb;
+
+    // Create a new post with the assistant's reply and the chosen post title
+    $table_name = $wpdb->prefix . 'chatgpt_message_history';
+    // Get the post object
+    $post = get_post($post_id);
+
+    $data = array(
+        'title' => $chosen_title,
+        'message' => $message,
+        'post_id' => $post_id,
+        'date' => $post->post_date,
+        'word_count' => str_word_count($assistant_reply),
+        'raw_response' => serialize($response_data)
+    );
+
     if ($post_id) {
         // Debug: return print_r($response_data);
-        return 'Success: The assistant\'s reply has been published as a post with ID: ' . $post_id;
+        $wpdb->insert($table_name, $data);
+
+        wp_send_json_success(array('success' => true, 'response' => '<span>Success: The assistant\'s reply has been published as a post with ID: <a href="'. get_admin_url() .'post.php?post='.$post_id.'&action=edit" target="_blank">'.$post_id.'</a></span>'));
     } else {
-        return 'Error: An error occurred while publishing the assistant\'s reply.';
+        wp_send_json_error(array('success' => false, 'error' => 'Error: An error occurred while publishing the assistant\'s reply.'));
     }
 }
 
+add_action('wp_ajax_chatgpt_assistant_generate_response', 'chatgpt_assistant_generate_response');
+add_action('wp_ajax_nopriv_chatgpt_assistant_generate_response', 'chatgpt_assistant_generate_response');
 
 
 

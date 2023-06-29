@@ -5,6 +5,14 @@
 }
 
 .page-header {
-    margin-top: 5rem;
-    margin-bottom: 1rem;
+    margin-top: 5rem !important;
+    margin-bottom: 1rem !important;
+}
+
+table.previous-messages tr.odd {
+    background: whitesmoke;
+}
+
+table.previous-messages .view-response a:focus {
+    text-decoration: none;
 }
