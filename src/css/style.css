@@ -3,3 +3,8 @@
     width: 20px; /* Adjust the size as needed */
     height: 20px; /* Adjust the size as needed */
 }
+
+.page-header {
+    margin-top: 5rem;
+    margin-bottom: 1rem;
+}

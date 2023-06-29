@@ -16,7 +16,10 @@
 // Include the pages and other sections
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-settings.php';
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-message-page.php';
+require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-history.php';
+
 require_once plugin_dir_path(__FILE__) . 'shortcode/chatgpt-assistant-shortcode.php';
+
 require_once plugin_dir_path(__FILE__) . 'chatgpt-assistant-menu.php';
 
 // Enqueue Bootstrap CSS and JavaScript files
@@ -24,13 +27,46 @@ function chatgpt_assistant_enqueue_scripts(): void
 {
     $plugin_directory = plugin_dir_url( __FILE__ );
 
-    wp_enqueue_style('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css');
-    wp_enqueue_script('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js', array('jquery'), '4.5.0', true);
     wp_enqueue_style('chatgpt-dashicon', $plugin_directory . 'src/img/chatgpt-dashicon.svg');
     wp_enqueue_style('chatgp-assistant-admin-styles', $plugin_directory . 'src/css/style.css');
+
     wp_enqueue_script('chatgp-assistant-admin-script', $plugin_directory . 'src/js/script.js');
+    // Localize the script to pass data to JavaScript
+    wp_localize_script(
+        'chatgp-assistant-admin-script',
+        'chatgptAssistantData',
+        array(
+            'ajaxurl' => admin_url('admin-ajax.php'),
+        )
+    );
 }
 add_action('admin_enqueue_scripts', 'chatgpt_assistant_enqueue_scripts');
+
+// Enqueue Bootstrap assets for your plugin's pages
+function chatgpt_assistant_enqueue_assets(): void
+{
+    // Get the current screen object
+    $screen = get_current_screen();
+
+    // Define an array of your plugin's page slugs
+    $plugin_pages = array(
+        'toplevel_page_chatgpt-assistant-settings',
+        'chatgpt-assistant_page_chatgpt-assistant-form',
+        'chatgpt-assistant_page_chatgpt-assistant-messages'
+    );
+
+    // Check if the current screen is in your plugin's pages
+    if (in_array($screen->id, $plugin_pages)) {
+        // Enqueue Bootstrap CSS
+        wp_enqueue_style('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css', array(), '4.5.2');
+
+        // Enqueue Bootstrap JS
+        wp_enqueue_script('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js', array('jquery'), '4.5.2');
+    }
+}
+add_action('admin_enqueue_scripts', 'chatgpt_assistant_enqueue_assets');
+
+
 
 // Function to retrieve the API key from plugin settings
 function chatgpt_assistant_get_api_key() {

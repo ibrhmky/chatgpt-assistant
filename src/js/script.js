@@ -1,18 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
-    var form = document.getElementById('chatgpt-assistant-form');
-    var responseElement = document.getElementById('chatgpt-assistant-response');
+    const form = document.getElementById('chatgpt-assistant-form');
+    const responseElement = document.getElementById('chatgpt-assistant-response');
 
     form.addEventListener('submit', function(event) {
         event.preventDefault();
-        var message = document.getElementById('chatgpt-assistant-message').value;
+        const message = document.getElementById('chatgpt-assistant-message').value;
         responseElement.style.display = 'none';
 
         // Call the API to generate a response
-        var data = new FormData();
+        const data = new FormData();
         data.append('action', 'chatgpt_assistant_generate_response');
         data.append('message', message);
 
-        fetch(ajaxurl, {
+        fetch(chatgptAssistantData.ajaxurl, {
             method: 'POST',
             body: data
         })
@@ -37,9 +37,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+
 document.addEventListener('DOMContentLoaded', function() {
-    var editButton = document.getElementById('chatgpt_assistant_edit_button');
-    var apiKeyInput = document.getElementById('chatgpt_assistant_api_key');
+    const editButton = document.getElementById('chatgpt_assistant_edit_button');
+    const apiKeyInput = document.getElementById('chatgpt_assistant_api_key');
 
     if (editButton) {
         editButton.addEventListener('click', function() {
@@ -52,23 +53,53 @@ document.addEventListener('DOMContentLoaded', function() {
 // Wait for the DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", function() {
     // Get the Edit button element
-    var editButton = document.getElementById("chatgpt_assistant_edit_button");
+    const editButton = document.getElementById("chatgpt_assistant_edit_button");
 
     // Get the API key input element
-    var apiKeyInput = document.getElementById("chatgpt_assistant_api_key");
+    const apiKeyInput = document.getElementById("chatgpt_assistant_api_key");
 
     // Get the submit button element
-    var submitButton = document.getElementById("chatgpt_assistant_submit_button");
+    const submitButton = document.getElementById("chatgpt_assistant_submit_button");
 
-    // Add click event listener to the Edit button
-    editButton.addEventListener("click", function() {
-        // Enable the input field
-        apiKeyInput.disabled = false;
+    if (editButton) { // Add click event listener to the Edit button
+        editButton.addEventListener("click", function () {
+            // Enable the input field
+            apiKeyInput.disabled = false;
 
-        // Show the submit button
-        submitButton.style.display = "block";
+            // Show the submit button
+            submitButton.style.display = "block";
 
-        // Hide the Edit button
-        editButton.style.display = "none";
-    });
+            // Hide the Edit button
+            editButton.style.display = "none";
+        });
+    }
 });
+
+function deleteMessage(index) {
+    if (confirm('Are you sure you want to delete this message?')) {
+        // Create a new XMLHttpRequest object
+        const xhr = new XMLHttpRequest();
+
+        // Prepare the request
+        xhr.open('POST', ajaxurl, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        // Set up the data to send
+        const data = 'action=chatgpt_assistant_delete_message' +
+            '&index=' + index +
+            '&nonce=<?php echo wp_create_nonce("chatgpt_assistant_delete_message_nonce"); ?>';
+
+        // Set up the callback function
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                // Refresh the page on successful deletion
+                if (xhr.responseText === 'success') {
+                    location.reload();
+                }
+            }
+        };
+
+        // Send the request
+        xhr.send(data);
+    }
+}
