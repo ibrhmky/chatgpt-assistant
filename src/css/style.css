@@ -16,3 +16,7 @@ table.previous-messages tr.odd {
 table.previous-messages .view-response a:focus {
     text-decoration: none;
 }
+
+.page-link {
+    height: fit-content;
+}

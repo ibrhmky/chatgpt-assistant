@@ -46,8 +46,7 @@ function chatgpt_assistant_enqueue_assets(): void
         wp_enqueue_script('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js', array('jquery'), '4.5.2');
 
         wp_enqueue_script( 'jquery' );
-        wp_enqueue_script( 'datatables', 'https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js', array( 'jquery' ), '1.11.3' );
-        wp_enqueue_style( 'datatables', 'https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css', array(), '1.11.3' );
+        wp_enqueue_script( 'twbs', 'https://cdnjs.cloudflare.com/ajax/libs/twbs-pagination/1.4.2/jquery.twbsPagination.min.js');
 
         wp_enqueue_style('chatgpt-dashicon', $plugin_directory . 'src/img/chatgpt-dashicon.svg');
         wp_enqueue_style('chatgp-assistant-admin-styles', $plugin_directory . 'src/css/style.css');

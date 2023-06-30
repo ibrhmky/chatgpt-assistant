@@ -85,35 +85,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-function deleteMessage(index) {
-    if (confirm('Are you sure you want to delete this message?')) {
-        // Create a new XMLHttpRequest object
-        const xhr = new XMLHttpRequest();
-
-        // Prepare the request
-        xhr.open('POST', ajaxurl, true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-        // Set up the data to send
-        const data = 'action=chatgpt_assistant_delete_message' +
-            '&index=' + index +
-            '&nonce=<?php echo wp_create_nonce("chatgpt_assistant_delete_message_nonce"); ?>';
-
-        // Set up the callback function
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                // Refresh the page on successful deletion
-                if (xhr.responseText === 'success') {
-                    location.reload();
-                }
-            }
-        };
-
-        // Send the request
-        xhr.send(data);
-    }
-}
-
 function toggleResponse(link) {
     const responseRow = document.getElementById(link.getAttribute('href').replace('#', ''));
     if (responseRow.classList.contains('show')) {

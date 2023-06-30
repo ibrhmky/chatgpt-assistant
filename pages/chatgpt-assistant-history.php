@@ -6,8 +6,23 @@ function chatgpt_assistant_messages_page(): void
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatgpt_message_history';
 
-    // Retrieve the messages from the database
-    $messages = $wpdb->get_results("SELECT * FROM $table_name ORDER BY date DESC");
+    // Retrieve the total number of messages
+    $total_messages = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+
+    // Set the number of messages to display per page
+    $messages_per_page = 10;
+
+    // Calculate the total number of pages
+    $total_pages = ceil($total_messages / $messages_per_page);
+
+    // Get the current page number
+    $current_page = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
+
+    // Calculate the offset for the messages query
+    $offset = ($current_page - 1) * $messages_per_page;
+
+    // Retrieve the messages from the database with pagination
+    $messages = $wpdb->get_results("SELECT * FROM $table_name ORDER BY date DESC LIMIT $offset, $messages_per_page");
 
     ?>
     <div class="container">
@@ -26,7 +41,7 @@ function chatgpt_assistant_messages_page(): void
             </thead>
             <tbody>
             <?php
-            $row_number = 1; // Initialize row number
+            $row_number = ($current_page - 1) * $messages_per_page + 1; // Initialize row number
             foreach ($messages as $message) {
                 // Toggle row class
                 $row_class = ($row_number % 2 == 0) ? 'even' : 'odd';
@@ -48,6 +63,35 @@ function chatgpt_assistant_messages_page(): void
             ?>
             </tbody>
         </table>
+
+        <?php
+        // Display pagination links
+        echo '<nav aria-label="Search results pages" class="pagination justify-content-center">';
+        echo '<ul class="pagination">';
+        $pages = paginate_links(array(
+            'base' => add_query_arg('paged', '%#%'),
+            'format' => '',
+            'prev_text' => '&laquo;',
+            'next_text' => '&raquo;',
+            'total' => $total_pages,
+            'current' => $current_page,
+        ));
+
+
+        $page_1 = str_replace('class="page-numbers','class="page-link',$pages);
+        $page_2 = str_replace('<a class="page-link"','<li class="page-item"><a class="page-link"', $page_1);
+        $page_3 = str_replace('<a class="next','</li><li class="page-item"><a class="page-link next', $page_2);
+        $page_4 = str_replace('<a class="prev','<li class="page-item"><a class="page-link prev', $page_3);
+        $page_5 = str_replace('«</a>','«</a></li>', $page_4);
+        $page_6 = str_replace('<span aria-current','<li class="page-item disabled"><span aria-current', $page_5);
+
+        echo str_replace('</span>','</span></li>', $page_6);
+
+
+
+        echo '</ul>';
+        echo '</nav>';
+        ?>
     </div>
 
     <?php
