@@ -72,6 +72,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Wait for the DOM to be fully loaded
+document.addEventListener("DOMContentLoaded", function() {
+    // Get the Edit button element
+    const editButton = document.getElementById("chatgpt_assistant_edit_button");
+
+    // Get the API key input element
+    const apiKeyInput = document.getElementById("chatgpt_assistant_api_key");
+
+    // Get the submit button element
+    const submitButton = document.getElementById("chatgpt_assistant_submit_button");
+
+    if (editButton) { // Add click event listener to the Edit button
+        editButton.addEventListener("click", function () {
+            // Enable the input field
+            apiKeyInput.disabled = false;
+
+            // Show the submit button
+            submitButton.style.display = "block";
+
+            // Hide the Edit button
+            editButton.style.display = "none";
+        });
+    }
+});
+
 // Function to toggle the response visibility
 function toggleResponse(link) {
     const responseRow = document.getElementById(link.getAttribute('href').replace('#', ''));
