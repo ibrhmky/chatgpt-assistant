@@ -1,22 +1,58 @@
+/* Use custom icon for the chat dashicon */
 .dashicons-chatgpt-dashicon::before {
     content: url('../img/chatgpt-dashicon.svg');
     width: 20px; /* Adjust the size as needed */
     height: 20px; /* Adjust the size as needed */
 }
 
+/* Adjust the margin of the page header */
 .page-header {
     margin-top: 5rem !important;
     margin-bottom: 1rem !important;
 }
 
+/* Set background color for odd rows in the previous messages table */
 table.previous-messages tr.odd {
     background: whitesmoke;
 }
 
+/* Remove text decoration when a view response link is focused */
 table.previous-messages .view-response a:focus {
     text-decoration: none;
 }
 
+/* Set color for links in table headers */
+table.previous-messages th a {
+    color: white;
+}
+
+/* Remove text decoration on hover for links in table headers */
+table.previous-messages th a:hover {
+    text-decoration: none;
+}
+
+/* Adjust the height of page links in previous messages table */
 .page-link {
     height: fit-content;
+}
+
+/* Hide the submit info text by default */
+.chatgpt-assistant-submit-info {
+    display: none;
+}
+
+/* Create a wrapper div for the submit button and submit info */
+.submit-wrapper {
+    display: flex; /* Use flexbox for horizontal layout */
+    align-items: center; /* Vertically center the contents */
+}
+
+/* Add margin between the submit button and submit info */
+.submit-wrapper button {
+    margin-right: 10px;
+}
+
+/* Center the submit info text horizontally */
+.chatgpt-assistant-submit-info {
+    text-align: center;
 }

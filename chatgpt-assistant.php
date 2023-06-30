@@ -8,7 +8,7 @@
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * License: GPL v2 or later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: chatgpt-assistant
  * Domain Path: /languages
  */
@@ -22,10 +22,12 @@ require_once plugin_dir_path(__FILE__) . 'shortcode/chatgpt-assistant-shortcode.
 
 require_once plugin_dir_path(__FILE__) . 'chatgpt-assistant-menu.php';
 
-// Enqueue Bootstrap assets for your plugin's pages
+/**
+ * Enqueue Bootstrap assets for your plugin's pages
+ */
 function chatgpt_assistant_enqueue_assets(): void
 {
-    $plugin_directory = plugin_dir_url( __FILE__ );
+    $plugin_directory = plugin_dir_url(__FILE__);
 
     // Get the current screen object
     $screen = get_current_screen();
@@ -37,6 +39,10 @@ function chatgpt_assistant_enqueue_assets(): void
         'chatgpt-assistant_page_chatgpt-assistant-messages'
     );
 
+    // CSS and SVG must be shown everywhere
+    wp_enqueue_style('chatgpt-dashicon', $plugin_directory . 'src/img/chatgpt-dashicon.svg');
+    wp_enqueue_style('chatgp-assistant-admin-styles', $plugin_directory . 'src/css/style.css');
+
     // Check if the current screen is in your plugin's pages
     if (in_array($screen->id, $plugin_pages)) {
         // Enqueue Bootstrap CSS
@@ -45,17 +51,20 @@ function chatgpt_assistant_enqueue_assets(): void
         // Enqueue Bootstrap JS
         wp_enqueue_script('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js', array('jquery'), '4.5.2');
 
-        wp_enqueue_script( 'jquery' );
-        wp_enqueue_script( 'twbs', 'https://cdnjs.cloudflare.com/ajax/libs/twbs-pagination/1.4.2/jquery.twbsPagination.min.js');
+        wp_enqueue_script('jquery');
+        wp_enqueue_script('twbs', 'https://cdnjs.cloudflare.com/ajax/libs/twbs-pagination/1.4.2/jquery.twbsPagination.min.js');
 
-        wp_enqueue_style('chatgpt-dashicon', $plugin_directory . 'src/img/chatgpt-dashicon.svg');
-        wp_enqueue_style('chatgp-assistant-admin-styles', $plugin_directory . 'src/css/style.css');
+        wp_enqueue_script('fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js');
+        wp_enqueue_style('fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 
         wp_enqueue_script('chatgp-assistant-admin-script', $plugin_directory . 'src/js/script.js');
     }
 }
 add_action('admin_enqueue_scripts', 'chatgpt_assistant_enqueue_assets');
 
+/**
+ * Creates the database table for storing chat message history.
+ */
 function chatgpt_assistant_create_table(): void
 {
     global $wpdb;
@@ -63,6 +72,7 @@ function chatgpt_assistant_create_table(): void
 
     $charset_collate = $wpdb->get_charset_collate();
 
+    // Define the SQL query to create the table
     $sql = "CREATE TABLE $table_name (
         id INT(11) NOT NULL AUTO_INCREMENT,
         title VARCHAR(255) NOT NULL,
@@ -75,17 +85,26 @@ function chatgpt_assistant_create_table(): void
     ) $charset_collate;";
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    // Execute the SQL query to create the table
     dbDelta($sql);
 }
+
+// Register the table creation function to be executed on plugin activation
 register_activation_hook(__FILE__, 'chatgpt_assistant_create_table');
 
-// Function to retrieve the API key from plugin settings
-function chatgpt_assistant_get_api_key() {
+/**
+ * Function to retrieve the API key from plugin settings
+ */
+function chatgpt_assistant_get_api_key()
+{
     return get_option('chatgpt_assistant_api_key', '');
 }
 
-// Function to generate a response from ChatGPT and publish it as a post
-function chatgpt_assistant_generate_response(): void {
+/**
+ * Function to generate a response from ChatGPT and publish it as a post
+ */
+function chatgpt_assistant_generate_response()
+{
     // Retrieve the message from the request
     $message = isset($_POST['message']) ? sanitize_text_field($_POST['message']) : '';
 
@@ -180,10 +199,3 @@ function chatgpt_assistant_generate_response(): void {
 
 add_action('wp_ajax_chatgpt_assistant_generate_response', 'chatgpt_assistant_generate_response');
 add_action('wp_ajax_nopriv_chatgpt_assistant_generate_response', 'chatgpt_assistant_generate_response');
-
-
-
-
-
-
-

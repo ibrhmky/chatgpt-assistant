@@ -16,7 +16,6 @@
     ·
     <a href="https://github.com/yourusername/yourrepository/issues">Request Feature</a>
   </p>
-</p>
 
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents

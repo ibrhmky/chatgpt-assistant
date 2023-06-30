@@ -1,6 +1,8 @@
 <?php
 
-// Display the messages page
+/**
+ * Display the messages page.
+ */
 function chatgpt_assistant_messages_page(): void
 {
     global $wpdb;
@@ -21,21 +23,46 @@ function chatgpt_assistant_messages_page(): void
     // Calculate the offset for the messages query
     $offset = ($current_page - 1) * $messages_per_page;
 
-    // Retrieve the messages from the database with pagination
-    $messages = $wpdb->get_results("SELECT * FROM $table_name ORDER BY date DESC LIMIT $offset, $messages_per_page");
+    // Define the sorting parameters
+    $orderby = isset($_GET['orderby']) ? sanitize_key($_GET['orderby']) : 'date';
+    $order = isset($_GET['order']) ? sanitize_key($_GET['order']) : 'desc';
+
+    // Retrieve the messages from the database with sorting and pagination
+    $messages = $wpdb->get_results("SELECT * FROM $table_name ORDER BY $orderby $order LIMIT $offset, $messages_per_page");
 
     ?>
-    <div class="container">
+    <div class="container table-responsive">
         <h1 class="page-header">ChatGPT Assistant Previous Messages</h1>
-        <table class="wp-list-table table table-auto previous-messages">
-            <thead>
+        <table class="wp-list-table table table-auto table-hover previous-messages">
+            <caption><?php echo $total_messages ?> Messages</caption>
+            <thead class="thead-dark">
             <tr>
                 <th scope='col'>No</th>
-                <th scope='col'>Message</th>
-                <th scope='col'>Title</th>
-                <th scope='col'>Post ID</th>
-                <th scope='col'>Date</th>
-                <th scope='col'>Word Count</th>
+                <th scope='col'>
+                    <a href="<?php echo esc_url(add_query_arg(array('orderby' => 'message', 'order' => ((isset($_GET['orderby']) && $_GET['orderby'] == 'message') && (isset($_GET['order']) && $_GET['order'] == 'asc')) ? 'desc' : 'asc'))); ?>">
+                        Message <?php echo ($_GET['orderby'] ?? '') == 'message' && ($_GET['order'] ?? '') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>'; ?>
+                    </a>
+                </th>
+                <th scope='col'>
+                    <a href="<?php echo esc_url(add_query_arg(array('orderby' => 'title', 'order' => ((isset($_GET['orderby']) && $_GET['orderby'] == 'title') && (isset($_GET['order']) && $_GET['order'] == 'asc')) ? 'desc' : 'asc'))); ?>">
+                        Title <?php echo ($_GET['orderby'] ?? '') == 'title' && ($_GET['order'] ?? '') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>'; ?>
+                    </a>
+                </th>
+                <th scope='col'>
+                    <a href="<?php echo esc_url(add_query_arg(array('orderby' => 'post_id', 'order' => ((isset($_GET['orderby']) && $_GET['orderby'] == 'post_id') && (isset($_GET['order']) && $_GET['order'] == 'asc')) ? 'desc' : 'asc'))); ?>">
+                        Post ID <?php echo ($_GET['orderby'] ?? '') == 'post_id' && ($_GET['order'] ?? '') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>'; ?>
+                    </a>
+                </th>
+                <th scope='col'>
+                    <a href="<?php echo esc_url(add_query_arg(array('orderby' => 'date', 'order' => ((isset($_GET['orderby']) && $_GET['orderby'] == 'date') && (isset($_GET['order']) && $_GET['order'] == 'asc')) ? 'desc' : 'asc'))); ?>">
+                        Date <?php echo ($_GET['orderby'] ?? '') == 'date' && ($_GET['order'] ?? '') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>'; ?>
+                    </a>
+                </th>
+                <th scope='col'>
+                    <a href="<?php echo esc_url(add_query_arg(array('orderby' => 'word_count', 'order' => ((isset($_GET['orderby']) && $_GET['orderby'] == 'word_count') && (isset($_GET['order']) && $_GET['order'] == 'asc')) ? 'desc' : 'asc'))); ?>">
+                        Word Count <?php echo ($_GET['orderby'] ?? '') == 'word_count' && ($_GET['order'] ?? '') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>'; ?>
+                    </a>
+                </th>
                 <th scope='col'>Raw Response</th>
             </tr>
             </thead>
@@ -77,7 +104,7 @@ function chatgpt_assistant_messages_page(): void
             'current' => $current_page,
         ));
 
-
+        // Turn paginate_links created look into Bootsrap look
         $page_1 = str_replace('class="page-numbers','class="page-link',$pages);
         $page_2 = str_replace('<a class="page-link"','<li class="page-item"><a class="page-link"', $page_1);
         $page_3 = str_replace('<a class="next','</li><li class="page-item"><a class="page-link next', $page_2);
@@ -86,7 +113,6 @@ function chatgpt_assistant_messages_page(): void
         $page_6 = str_replace('<span aria-current','<li class="page-item disabled"><span aria-current', $page_5);
 
         echo str_replace('</span>','</span></li>', $page_6);
-
 
 
         echo '</ul>';

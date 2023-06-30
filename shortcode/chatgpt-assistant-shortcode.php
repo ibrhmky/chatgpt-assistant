@@ -1,6 +1,8 @@
 <?php
 
-// Add a shortcode to display the assistant form
+/**
+ * Add a shortcode to display the assistant form
+ */
 function chatgpt_assistant_shortcode(): string
 {
     $output = '';

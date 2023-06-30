@@ -1,6 +1,8 @@
 <?php
 
-// Display the settings page
+/**
+ * Displays the settings page for ChatGPT Assistant.
+ */
 function chatgpt_assistant_settings_page(): void
 {
     // Check if the user has permission to access the settings page
@@ -51,6 +53,12 @@ function chatgpt_assistant_settings_page(): void
     <?php
 }
 
+/**
+ * Validates the provided API key for ChatGPT Assistant.
+ *
+ * @param string $api_key The API key to validate.
+ * @return bool True if the API key is valid, false otherwise.
+ */
 function chatgpt_assistant_validate_api_key($api_key): bool {
     $response = wp_remote_get(
         'https://api.openai.com/v1/engines',

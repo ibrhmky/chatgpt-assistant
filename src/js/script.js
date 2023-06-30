@@ -1,20 +1,27 @@
+// Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+
+    // Get the form and response element
     const form = document.getElementById('chatgpt-assistant-form');
     const responseElement = document.getElementById('chatgpt-assistant-response');
 
     if (form) {
+        // Add submit event listener to the form
         form.addEventListener('submit', function (event) {
             event.preventDefault();
+
+            // Get the message value
             const message = document.getElementById('chatgpt-assistant-message').value;
             responseElement.style.display = 'none';
 
-            // Call the API to generate a response
+            // Prepare the data to be sent
             const data = new URLSearchParams();
             data.append('action', 'chatgpt_assistant_generate_response');
             data.append('message', message);
 
             console.log(data.toString());
 
+            // Send the data to the server
             fetch(ajaxurl, {
                 method: 'POST',
                 body: data.toString(),
@@ -29,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return response.json();
                 })
                 .then(function (data) {
+                    // Handle the response data
                     if (data.success) {
                         responseElement.innerHTML = data.data.response;
                         responseElement.className = 'alert alert-success';
@@ -47,44 +55,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-
+// Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+
+    // Get the edit button and API key input
     const editButton = document.getElementById('chatgpt_assistant_edit_button');
     const apiKeyInput = document.getElementById('chatgpt_assistant_api_key');
 
     if (editButton) {
+        // Add click event listener to the edit button
         editButton.addEventListener('click', function() {
+            // Enable the API key input field
             apiKeyInput.removeAttribute('disabled');
             apiKeyInput.focus();
         });
     }
 });
 
-// Wait for the DOM to be fully loaded
-document.addEventListener("DOMContentLoaded", function() {
-    // Get the Edit button element
-    const editButton = document.getElementById("chatgpt_assistant_edit_button");
-
-    // Get the API key input element
-    const apiKeyInput = document.getElementById("chatgpt_assistant_api_key");
-
-    // Get the submit button element
-    const submitButton = document.getElementById("chatgpt_assistant_submit_button");
-
-    if (editButton) { // Add click event listener to the Edit button
-        editButton.addEventListener("click", function () {
-            // Enable the input field
-            apiKeyInput.disabled = false;
-
-            // Show the submit button
-            submitButton.style.display = "block";
-
-            // Hide the Edit button
-            editButton.style.display = "none";
-        });
-    }
-});
-
+// Function to toggle the response visibility
 function toggleResponse(link) {
     const responseRow = document.getElementById(link.getAttribute('href').replace('#', ''));
     if (responseRow.classList.contains('show')) {
@@ -103,3 +91,61 @@ for (let i = 0; i < viewResponseLinks.length; i++) {
         toggleResponse(link);
     });
 }
+
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the message input field
+    const messageInput = document.getElementById('message');
+
+    // Add an event listener for keydown events
+    messageInput.addEventListener('keydown', function(event) {
+        // Check if the event key is Enter and the event's CTRL (or Meta) key is pressed
+        if ((event.key === 'Enter' || event.keyCode === 13) && (event.ctrlKey || event.metaKey)) {
+            // Prevent the default behavior of the Enter key (usually creating a new line)
+            event.preventDefault();
+
+            // Submit the form
+            document.getElementById('chat-form').submit();
+        }
+    });
+});
+
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Find the message textarea, submit button, and submit info
+    const messageTextarea = document.getElementById('chatgpt-assistant-message');
+    const submitButton = document.getElementById('submit-chatgpt-message');
+    const submitInfo = document.getElementById('chatgpt-assistant-submit-info');
+
+    // Function to check if the user pressed CTRL+ENTER (or CMD+ENTER on macOS)
+    function isCtrlEnter(event) {
+        return (event.ctrlKey || event.metaKey) && event.key === 'Enter';
+    }
+
+    // Function to handle form submission
+    function handleFormSubmit(event) {
+        if (isCtrlEnter(event)) {
+            // Prevent the default form submission behavior
+            event.preventDefault();
+
+            // Programmatically click the submit button
+            submitButton.click();
+        }
+    }
+
+    // Function to handle textarea focus
+    function handleTextareaFocus() {
+        submitInfo.style.display = 'inline'; // Show the submit info text
+    }
+
+    // Function to handle textarea blur
+    function handleTextareaBlur() {
+        submitInfo.style.display = 'none'; // Hide the submit info text
+    }
+
+    // Attach the event listeners
+    messageTextarea.addEventListener('keydown', handleFormSubmit);
+    messageTextarea.addEventListener('focus', handleTextareaFocus);
+    messageTextarea.addEventListener('blur', handleTextareaBlur);
+});
