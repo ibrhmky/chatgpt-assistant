@@ -82,7 +82,7 @@ function chatgpt_assistant_messages_page(): void
                 echo '<td class="view-response"><a class="btn btn-link" data-toggle="collapse" href="#response-'.$message->id.'" role="button" aria-expanded="false" aria-controls="response-'.$message->id.'" onclick="toggleResponse(this)">View</a></td>';
                 echo '</tr>';
                 echo '<tr class="collapse ' . $row_class . '" id="response-'.$message->id.'">';
-                echo '<td style="background: white" colspan="7"><pre>' . esc_html(print_r(unserialize($message->raw_response), true)) . '</pre></td>';
+                echo '<td style="background: white" colspan="7"><pre style="white-space: pre-wrap; word-wrap: break-word;">' . esc_html(print_r(unserialize($message->raw_response), true)) . '</pre></td>';
                 echo '</tr>';
 
                 $row_number++; // Increment row number
