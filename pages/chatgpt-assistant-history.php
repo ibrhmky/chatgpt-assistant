@@ -31,10 +31,19 @@ function chatgpt_assistant_messages_page(): void
     $messages = $wpdb->get_results("SELECT * FROM $table_name ORDER BY $orderby $order LIMIT $offset, $messages_per_page");
 
     ?>
-    <div class="container table-responsive">
-        <h1 class="page-header">ChatGPT Assistant Previous Messages</h1>
+    <div class="container-fluid table-responsive">
+        <h3 class="page-header-sm">ChatGPT Assistant Previous Messages</h3>
         <table class="wp-list-table table table-auto table-hover previous-messages">
             <caption><?php echo $total_messages ?> Messages</caption>
+            <colgroup>
+                <col style="width: 3%">
+                <col style="width: 28%">
+                <col style="width: 28%">
+                <col style="width: 9%">
+                <col style="width: 15%">
+                <col style="width: 10%">
+                <col style="width: 7%">
+            </colgroup>
             <thead class="thead-dark">
             <tr>
                 <th scope='col'>No</th>
@@ -113,7 +122,6 @@ function chatgpt_assistant_messages_page(): void
         $page_6 = str_replace('<span aria-current','<li class="page-item disabled"><span aria-current', $page_5);
 
         echo str_replace('</span>','</span></li>', $page_6);
-
 
         echo '</ul>';
         echo '</nav>';

@@ -19,8 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
             data.append('action', 'chatgpt_assistant_generate_response');
             data.append('message', message);
 
-            console.log(data.toString());
-
             // Send the data to the server
             fetch(ajaxurl, {
                 method: 'POST',
@@ -30,12 +28,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
             })
                 .then(function (response) {
+                    hideLoadingState();
                     if (!response.ok) {
                         throw new Error('HTTP status ' + response.status + ', ' + response.statusText);
                     }
                     return response.json();
                 })
                 .then(function (data) {
+                    hideLoadingState();
                     // Handle the response data
                     if (data.success) {
                         responseElement.innerHTML = data.data.response;
@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     responseElement.style.display = 'block';
                 })
                 .catch(function (error) {
+                    hideLoadingState();
                     responseElement.textContent = 'An error occurred while retrieving the assistant\'s response: ' + error.message;
                     responseElement.className = 'alert alert-danger';
                     responseElement.style.display = 'block';
@@ -122,17 +123,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Find the message input field
     const messageInput = document.getElementById('message');
 
-    // Add an event listener for keydown events
-    messageInput.addEventListener('keydown', function(event) {
-        // Check if the event key is Enter and the event's CTRL (or Meta) key is pressed
-        if ((event.key === 'Enter' || event.keyCode === 13) && (event.ctrlKey || event.metaKey)) {
-            // Prevent the default behavior of the Enter key (usually creating a new line)
-            event.preventDefault();
+    if (messageInput) { // Add an event listener for keydown events
+        messageInput.addEventListener('keydown', function (event) {
+            // Check if the event key is Enter and the event's CTRL (or Meta) key is pressed
+            if ((event.key === 'Enter' || event.keyCode === 13) && (event.ctrlKey || event.metaKey)) {
+                // Prevent the default behavior of the Enter key (usually creating a new line)
+                event.preventDefault();
 
-            // Submit the form
-            document.getElementById('chat-form').submit();
-        }
-    });
+                // Submit the form
+                document.getElementById('chat-form').submit();
+            }
+        });
+    }
 });
 
 // Wait for the DOM to be fully loaded
@@ -169,8 +171,42 @@ document.addEventListener('DOMContentLoaded', function() {
         submitInfo.style.display = 'none'; // Hide the submit info text
     }
 
-    // Attach the event listeners
-    messageTextarea.addEventListener('keydown', handleFormSubmit);
-    messageTextarea.addEventListener('focus', handleTextareaFocus);
-    messageTextarea.addEventListener('blur', handleTextareaBlur);
+    if (messageTextarea) { // Attach the event listeners
+        messageTextarea.addEventListener('keydown', handleFormSubmit);
+        messageTextarea.addEventListener('focus', handleTextareaFocus);
+        messageTextarea.addEventListener('blur', handleTextareaBlur);
+    }
+});
+
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Get references to the button and loader elements
+    const submitButton = document.getElementById("submit-chatgpt-message");
+    const submitButtonText = document.getElementById("submit-btn-text");
+    const submitButtonLoader = document.getElementById("submit-btn-loader");
+
+    // Function to show the loading state
+    function showLoadingState() {
+        submitButton.disabled = true;
+        submitButtonText.style.display = "none";
+        submitButtonLoader.classList.remove("d-none");
+    }
+
+    // Function to hide the loading state
+    window.hideLoadingState = function() {
+        submitButton.disabled = false;
+        submitButtonText.style.display = "inline-block";
+        submitButtonLoader.classList.add("d-none");
+    }
+
+    // Add event listener to the form submission
+    document.getElementById("chatgpt-assistant-form").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent the form from submitting normally
+
+        // Show the loading state
+        showLoadingState();
+
+    });
+
 });

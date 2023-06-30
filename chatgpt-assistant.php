@@ -114,7 +114,7 @@ function chatgpt_assistant_generate_response()
     // Prepare the data for the API request
     $data = array(
         'messages' => array(
-            array('role' => 'system', 'content' => 'You are a helpful assistant. Before your message done please create a title for it and use "|" as separator and separate title from your message.'),
+            array('role' => 'system', 'content' => 'You are a helpful assistant. Before your message done please create a title for it and use "|" as separator and separate title from your message. I want only one title no need for variations. And only use one "|".'),
             array('role' => 'user', 'content' => $message)
         ),
         'model' => $model_id // Add the model parameter

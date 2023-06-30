@@ -12,7 +12,7 @@ function chatgpt_assistant_form_page(): void
 
     // Display the form
     ?>
-    <div class="container">
+    <div class="container mx-width-600">
         <h1 class="page-header">ChatGPT Assistant Message</h1>
         <form id="chatgpt-assistant-form" class="mb-4">
             <div class="form-group">
@@ -20,7 +20,10 @@ function chatgpt_assistant_form_page(): void
             </div>
             <small class="form-text text-muted">Your message will be turned into a post with a related title.</small>
             <div class="submit-wrapper mt-2">
-                <button id="submit-chatgpt-message" type="submit" class="btn btn-primary">Submit</button>
+                <button id="submit-chatgpt-message" type="submit" class="btn btn-primary">
+                    <span id="submit-btn-text">Submit</span>
+                    <span id="submit-btn-loader" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
                 <span id="chatgpt-assistant-submit-info" class="chatgpt-assistant-submit-info">(Ctrl+Enter)</span>
             </div>
         </form>

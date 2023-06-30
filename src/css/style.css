@@ -11,6 +11,11 @@
     margin-bottom: 1rem !important;
 }
 
+.page-header-sm {
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
 /* Set background color for odd rows in the previous messages table */
 table.previous-messages tr.odd {
     background: whitesmoke;
@@ -55,4 +60,15 @@ table.previous-messages th a:hover {
 /* Center the submit info text horizontally */
 .chatgpt-assistant-submit-info {
     text-align: center;
+}
+
+/* Add max-width to container in certain pages */
+.mx-width-600 {
+    max-width: 600px !important;
+}
+
+/* Adjust spinner size at submit button */
+.spinner-border-sm {
+    width: 1.2rem !important;
+    height: 1.2rem !important;
 }
