@@ -72,7 +72,7 @@ function chatgpt_assistant_messages_page(): void
                         Word Count <?php echo ($_GET['orderby'] ?? '') == 'word_count' && ($_GET['order'] ?? '') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>'; ?>
                     </a>
                 </th>
-                <th scope='col'>Raw Response</th>
+                <th scope='col'>Response</th>
             </tr>
             </thead>
             <tbody>

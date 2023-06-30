@@ -13,7 +13,7 @@ function chatgpt_assistant_form_page(): void
     // Display the form
     ?>
     <div class="container mx-width-600">
-        <h1 class="page-header">ChatGPT Assistant Message</h1>
+        <h3 class="page-header">ChatGPT Assistant Message</h3>
         <form id="chatgpt-assistant-form" class="mb-4">
             <div class="form-group">
                 <textarea class="form-control" id="chatgpt-assistant-message" name="message" rows="5" placeholder="Type your message here..." required></textarea>

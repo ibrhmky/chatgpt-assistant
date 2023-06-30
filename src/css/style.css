@@ -32,7 +32,7 @@ table.previous-messages th a {
 }
 
 /* Remove text decoration on hover for links in table headers */
-table.previous-messages th a:hover {
+table.previous-messages a:hover {
     text-decoration: none;
 }
 

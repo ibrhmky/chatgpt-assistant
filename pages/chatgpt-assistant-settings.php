@@ -30,7 +30,7 @@ function chatgpt_assistant_settings_page(): void
     // Display the settings form
     ?>
     <div class="container mx-width-600">
-        <h1 class="page-header">ChatGPT Assistant Settings</h1>
+        <h3 class="page-header">ChatGPT Assistant API Key</h3>
         <?php if ($is_api_key_set) : ?>
             <div class="alert alert-info" role="alert">A <b>valid</b> API key has been set successfully.</div>
         <?php endif; ?>
