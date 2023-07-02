@@ -72,3 +72,28 @@ table.previous-messages a:hover {
     width: 1.2rem !important;
     height: 1.2rem !important;
 }
+
+/* Custom CSS for message list */
+#message-list {
+    margin-top: 20px;
+    list-style: none;
+    padding-left: 0;
+}
+
+.list-group-item {
+    margin-bottom: 0;
+}
+
+.view-response .btn.btn-link {
+    vertical-align: unset !important;
+    border-radius: unset !important;
+    padding: unset !important;
+}
+
+table.previous-messages td {
+    padding: 0.3rem !important;
+    max-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

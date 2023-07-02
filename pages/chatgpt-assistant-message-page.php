@@ -20,14 +20,16 @@ function chatgpt_assistant_form_page(): void
             </div>
             <small class="form-text text-muted">Your message will be turned into a post with a related title.</small>
             <div class="submit-wrapper mt-2">
-                <button id="submit-chatgpt-message" type="submit" class="btn btn-primary">
+                <button id="submit-chatgpt-message" type="submit" onclick="sendMessageAPI()" class="btn btn-primary">
                     <span id="submit-btn-text">Submit</span>
                     <span id="submit-btn-loader" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                 </button>
+                <button id="bulk-input-button" type="button" class="btn btn-secondary">Bulk Input</button>
                 <span id="chatgpt-assistant-submit-info" class="chatgpt-assistant-submit-info">(Ctrl+Enter)</span>
             </div>
         </form>
         <div id="chatgpt-assistant-response" class="alert alert-info" style="display: none;"></div>
+        <ul id="message-list" class="list-group mt-4"></ul>
     </div>
     <?php
 }

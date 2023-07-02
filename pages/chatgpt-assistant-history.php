@@ -12,7 +12,7 @@ function chatgpt_assistant_messages_page(): void
     $total_messages = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
 
     // Set the number of messages to display per page
-    $messages_per_page = 10;
+    $messages_per_page = 15;
 
     // Calculate the total number of pages
     $total_pages = ceil($total_messages / $messages_per_page);
@@ -37,11 +37,11 @@ function chatgpt_assistant_messages_page(): void
             <caption><?php echo $total_messages ?> Messages</caption>
             <colgroup>
                 <col style="width: 3%">
-                <col style="width: 28%">
+                <col style="width: 24%">
                 <col style="width: 28%">
                 <col style="width: 9%">
                 <col style="width: 15%">
-                <col style="width: 10%">
+                <col style="width: 14%">
                 <col style="width: 7%">
             </colgroup>
             <thead class="thead-dark">
@@ -57,22 +57,22 @@ function chatgpt_assistant_messages_page(): void
                         Title <?php echo ($_GET['orderby'] ?? '') == 'title' && ($_GET['order'] ?? '') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>'; ?>
                     </a>
                 </th>
-                <th scope='col'>
+                <th scope='col' class="text-center">
                     <a href="<?php echo esc_url(add_query_arg(array('orderby' => 'post_id', 'order' => ((isset($_GET['orderby']) && $_GET['orderby'] == 'post_id') && (isset($_GET['order']) && $_GET['order'] == 'asc')) ? 'desc' : 'asc'))); ?>">
                         Post ID <?php echo ($_GET['orderby'] ?? '') == 'post_id' && ($_GET['order'] ?? '') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>'; ?>
                     </a>
                 </th>
-                <th scope='col'>
+                <th scope='col' class="text-center">
                     <a href="<?php echo esc_url(add_query_arg(array('orderby' => 'date', 'order' => ((isset($_GET['orderby']) && $_GET['orderby'] == 'date') && (isset($_GET['order']) && $_GET['order'] == 'asc')) ? 'desc' : 'asc'))); ?>">
                         Date <?php echo ($_GET['orderby'] ?? '') == 'date' && ($_GET['order'] ?? '') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>'; ?>
                     </a>
                 </th>
-                <th scope='col'>
+                <th scope='col' class="text-center">
                     <a href="<?php echo esc_url(add_query_arg(array('orderby' => 'word_count', 'order' => ((isset($_GET['orderby']) && $_GET['orderby'] == 'word_count') && (isset($_GET['order']) && $_GET['order'] == 'asc')) ? 'desc' : 'asc'))); ?>">
                         Word Count <?php echo ($_GET['orderby'] ?? '') == 'word_count' && ($_GET['order'] ?? '') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>'; ?>
                     </a>
                 </th>
-                <th scope='col'>Response</th>
+                <th scope='col' class="text-center">Response</th>
             </tr>
             </thead>
             <tbody>
@@ -85,10 +85,10 @@ function chatgpt_assistant_messages_page(): void
                 echo '<td>' . $row_number . '</td>'; // Display row number
                 echo '<td>' . esc_html($message->message) . '</td>';
                 echo '<td>' . esc_html($message->title) . '</td>';
-                echo '<td><a href="'. get_admin_url() .'post.php?post=' . esc_html($message->post_id) . '&action=edit" target="_blank">' . esc_html($message->post_id) . '</a></td>';
-                echo '<td>' . esc_html($message->date) . '</td>';
-                echo '<td>' . esc_html($message->word_count) . '</td>';
-                echo '<td class="view-response"><a class="btn btn-link" data-toggle="collapse" href="#response-'.$message->id.'" role="button" aria-expanded="false" aria-controls="response-'.$message->id.'" onclick="toggleResponse(this)">View</a></td>';
+                echo '<td class="text-center"><a href="'. get_admin_url() .'post.php?post=' . esc_html($message->post_id) . '&action=edit" target="_blank">' . esc_html($message->post_id) . '</a></td>';
+                echo '<td class="text-center">' . esc_html($message->date) . '</td>';
+                echo '<td class="text-center">' . esc_html($message->word_count) . '</td>';
+                echo '<td class="view-response text-center"><a class="btn btn-link" data-toggle="collapse" href="#response-'.$message->id.'" role="button" aria-expanded="false" aria-controls="response-'.$message->id.'" onclick="toggleResponse(this)">View</a></td>';
                 echo '</tr>';
                 echo '<tr class="collapse ' . $row_class . '" id="response-'.$message->id.'">';
                 echo '<td style="background: white" colspan="7"><pre style="white-space: pre-wrap; word-wrap: break-word;">' . esc_html(print_r(unserialize($message->raw_response), true)) . '</pre></td>';
@@ -102,15 +102,16 @@ function chatgpt_assistant_messages_page(): void
 
         <?php
         // Display pagination links
-        echo '<nav aria-label="Search results pages" class="pagination justify-content-center">';
-        echo '<ul class="pagination">';
+        echo '<nav aria-label="Search results pages" class="pagination justify-content-center mt-4">';
+        echo '<ul class="pagination pagination-sm">';
         $pages = paginate_links(array(
             'base' => add_query_arg('paged', '%#%'),
             'format' => '',
-            'prev_text' => '&laquo;',
-            'next_text' => '&raquo;',
+            'prev_text' => 'Previous',
+            'next_text' => 'Next',
             'total' => $total_pages,
             'current' => $current_page,
+            'show_all' => true,
         ));
 
         // Turn paginate_links created look into Bootsrap look
@@ -119,7 +120,7 @@ function chatgpt_assistant_messages_page(): void
         $page_3 = str_replace('<a class="next','</li><li class="page-item"><a class="page-link next', $page_2);
         $page_4 = str_replace('<a class="prev','<li class="page-item"><a class="page-link prev', $page_3);
         $page_5 = str_replace('«</a>','«</a></li>', $page_4);
-        $page_6 = str_replace('<span aria-current','<li class="page-item disabled"><span aria-current', $page_5);
+        $page_6 = str_replace('<span aria-current','<li class="page-item active"><span aria-current', $page_5);
 
         echo str_replace('</span>','</span></li>', $page_6);
 

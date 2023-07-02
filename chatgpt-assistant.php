@@ -103,10 +103,14 @@ function chatgpt_assistant_get_api_key()
 /**
  * Function to generate a response from ChatGPT and publish it as a post
  */
-function chatgpt_assistant_generate_response()
+function chatgpt_assistant_generate_response(): void
 {
     // Retrieve the message from the request
     $message = isset($_POST['message']) ? sanitize_text_field($_POST['message']) : '';
+
+    $bulk_input = isset($_POST['bulk_input']) ? sanitize_text_field($_POST['bulk_input']) : '';
+
+    $bulk_input_text = $bulk_input == 'false' ? '' : 'This is bulk input mode, think of each message I will write independently of each other. ';
 
     $api_key = chatgpt_assistant_get_api_key();
     $model_id = 'gpt-3.5-turbo';
@@ -114,7 +118,7 @@ function chatgpt_assistant_generate_response()
     // Prepare the data for the API request
     $data = array(
         'messages' => array(
-            array('role' => 'system', 'content' => 'You are a helpful assistant. Before your message done please create a title for it and use "|" as separator and separate title from your message. I want only one title no need for variations. And only use one "|".'),
+            array('role' => 'system', 'content' => $bulk_input_text . 'You are a helpful assistant. Before your message done please create a title for it and use "|" as separator and separate title from your message. I want only one title no need for variations. And only use one "|".'),
             array('role' => 'user', 'content' => $message)
         ),
         'model' => $model_id // Add the model parameter
