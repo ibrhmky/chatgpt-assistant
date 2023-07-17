@@ -35,9 +35,17 @@ function chatgpt_assistant_enqueue_assets(): void
     // Define an array of your plugin's page slugs
     $plugin_pages = array(
         'toplevel_page_chatgpt-assistant-settings',
-        'chatgpt-assistant_page_chatgpt-assistant-form',
-        'chatgpt-assistant_page_chatgpt-assistant-messages'
+        'chatgpt-assistant_page_chatgpt-assistant-form'
     );
+
+    // Check if the current screen is in your plugin's pages
+    if ($screen->id == 'chatgpt-assistant_page_chatgpt-assistant-messages') {
+        // Enqueue Bootstrap CSS
+        wp_enqueue_style('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css', array(), '4.5.2');
+
+        // Enqueue Bootstrap JS
+        wp_enqueue_script('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js', array('jquery'), '4.5.2');
+    }
 
     // CSS and SVG must be shown everywhere
     wp_enqueue_style('chatgpt-dashicon', $plugin_directory . 'src/img/chatgpt-dashicon.svg');
@@ -46,10 +54,10 @@ function chatgpt_assistant_enqueue_assets(): void
     // Check if the current screen is in your plugin's pages
     if (in_array($screen->id, $plugin_pages)) {
         // Enqueue Bootstrap CSS
-        wp_enqueue_style('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css', array(), '4.5.2');
+        wp_enqueue_style('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css', array(), '5.3.0');
 
         // Enqueue Bootstrap JS
-        wp_enqueue_script('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js', array('jquery'), '4.5.2');
+        wp_enqueue_script('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js', array('jquery'), '5.3.0');
 
         wp_enqueue_script('jquery');
         wp_enqueue_script('twbs', 'https://cdnjs.cloudflare.com/ajax/libs/twbs-pagination/1.4.2/jquery.twbsPagination.min.js');
@@ -110,7 +118,9 @@ function chatgpt_assistant_generate_response(): void
 
     $bulk_input = isset($_POST['bulk_input']) ? sanitize_text_field($_POST['bulk_input']) : '';
 
-    $bulk_input_text = $bulk_input == 'false' ? '' : 'This is bulk input mode, think of each message I will write independently of each other. ';
+    $assistant_mode = isset($_POST['assistantMode']) ? sanitize_text_field($_POST['assistantMode']) : '';
+
+    $bulk_input_text = $bulk_input == 'false' ? '' : ' PS: This is bulk input mode, think of each message I will write independently of each other.';
 
     $api_key = chatgpt_assistant_get_api_key();
     $model_id = 'gpt-3.5-turbo';
@@ -118,7 +128,7 @@ function chatgpt_assistant_generate_response(): void
     // Prepare the data for the API request
     $data = array(
         'messages' => array(
-            array('role' => 'system', 'content' => $bulk_input_text . 'You are a helpful assistant. Before your message done please create a title for it and use "|" as separator and separate title from your message. I want only one title no need for variations. And only use one "|".'),
+            array('role' => 'system', 'content' => 'You are a WordPress author, and you are expert on ' . $assistant_mode . '. Please write the WordPress post like you are an expert. Choose a title for this post and separate title from post with "|" symbol and do not use "Title:". I want only one title no need for variations. Please SEO optimize the post. Surround important words with "<b>" and "</b>". Add HTML tags when it is needed. ' . $bulk_input_text),
             array('role' => 'user', 'content' => $message)
         ),
         'model' => $model_id // Add the model parameter
@@ -161,8 +171,14 @@ function chatgpt_assistant_generate_response(): void
     // Separate the title from the assistant's response using the "|" separator
     $title_separator = '|';
     $messages = explode($title_separator, $assistant_messages);
+
     $chosen_title = trim($messages[0]); // Extract the first part as the chosen title
-    $assistant_reply = trim($messages[1]);
+    $assistant_reply = trim($messages[1]); // Extract the second part as the body
+
+    if (!$assistant_reply) {
+        $error_message = 'Error: Body part of the message is empty. There is an error while separating title from post.';
+        wp_send_json_error(array('error' => $error_message));
+    }
 
     // Create a new post with the assistant's reply and the chosen post title
     $post_data = array(

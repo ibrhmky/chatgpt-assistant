@@ -14,12 +14,28 @@ function chatgpt_assistant_form_page(): void
     ?>
     <div class="container mx-width-600">
         <h3 class="page-header">ChatGPT Assistant Message</h3>
-        <form id="chatgpt-assistant-form" class="mb-4">
+        <form id="chatgpt-assistant-form" method="post" action="" class="mb-4">
             <div class="form-group">
-                <textarea class="form-control" id="chatgpt-assistant-message" name="message" rows="5" placeholder="Type your message here..." required></textarea>
+                <div class="input-group mb-2">
+                    <textarea class="form-control" id="chatgpt-assistant-message" name="message" rows="6" placeholder="Type your message here..." required></textarea>
+                </div>
+                <div class="row">
+                    <small class="form-text text-muted mb-1">Please select an expertise if you want assistant to act like one.</small>
+                </div>
+                <div class="input-group mb-2" data-bs-theme="light">
+                    <label class="input-group-text" for="inputGroupSelect01">Expertise</label>
+                    <select class="form-select border-light-grey" aria-label="Expertise" id ="assistant_mode" name="assistantMode">
+                        <option selected value="0">Choose an expertise...</option>
+                        <option value="Technology">Technology</option>
+                        <option value="Art">Art</option>
+                        <option value="Marketing">Marketing</option>
+                    </select>
+                </div>
             </div>
-            <small class="form-text text-muted">Your message will be turned into a post with a related title.</small>
-            <div class="submit-wrapper mt-2">
+            <div class="row">
+                <small class="form-text text-muted">Your message will be turned into a post with a related title.</small>
+            </div>
+            <div class="submit-wrapper mt-1">
                 <button id="submit-chatgpt-message" type="submit" onclick="sendMessageAPI()" class="btn btn-primary">
                     <span id="submit-btn-text">Submit</span>
                     <span id="submit-btn-loader" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>

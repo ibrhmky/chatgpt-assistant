@@ -67,12 +67,6 @@ table.previous-messages a:hover {
     max-width: 600px !important;
 }
 
-/* Adjust spinner size at submit button */
-.spinner-border-sm {
-    width: 1.2rem !important;
-    height: 1.2rem !important;
-}
-
 /* Custom CSS for message list */
 #message-list {
     margin-top: 20px;
@@ -96,4 +90,9 @@ table.previous-messages td {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.border-light-grey {
+    border-color: #dee2e6 !important;
+    max-width: fit-content !important;
 }

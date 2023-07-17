@@ -14,6 +14,15 @@ async function sendMessageAPI(message = null, listItem = null) {
         bulkInputMode = bulkInputButton.classList.contains("btn-danger");
     }
 
+    const expertiseButton = document.getElementById("assistant_mode");
+
+    let expertiseSelection = '';
+
+    // Get the message value
+    if (expertiseButton) {
+        expertiseSelection = document.getElementById('assistant_mode').value;
+    }
+
     // Get the message value
     if (!message && bulkInputMode) {
         return;
@@ -42,6 +51,7 @@ async function sendMessageAPI(message = null, listItem = null) {
     data.append('action', 'chatgpt_assistant_generate_response');
     data.append('message', message);
     data.append('bulk_input', bulkInputText);
+    data.append('assistantMode', expertiseSelection);
 
     if (!message) {
         hideLoadingState();
@@ -239,14 +249,17 @@ document.addEventListener('DOMContentLoaded', function() {
         submitButtonLoader.classList.add("d-none");
     }
 
-    // Add event listener to the form submission
-    document.getElementById("chatgpt-assistant-form").addEventListener("submit", function(event) {
-        event.preventDefault(); // Prevent the form from submitting normally
+    const assistantForm = document.getElementById("chatgpt-assistant-form");
 
-        // Show the loading state
-        showLoadingState();
+    if (assistantForm) { // Add event listener to the form submission
+        assistantForm.addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent the form from submitting normally
 
-    });
+            // Show the loading state
+            showLoadingState();
+
+        });
+    }
 
 });
 
@@ -331,6 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function extractMessagesFromTextarea() {
         const inputValue = textarea.value.trim();
+        console.log("extract the message")
         return bulkInputMode ? inputValue.split("\n").map(message => message.trim()) : [inputValue];
     }
 
