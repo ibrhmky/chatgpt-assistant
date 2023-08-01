@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: ChatGPT Assistant
+ * Plugin Name: AI Content Generator
  * Description: Integrates with OpenAI API to provide an AI-powered assistant.
  * Author: İbrahim KAYA
  * Author URI: https://ibrhmky.com
@@ -17,6 +17,7 @@
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-settings.php';
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-message-page.php';
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-history.php';
+require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-new-post-page.php';
 
 require_once plugin_dir_path(__FILE__) . 'shortcode/chatgpt-assistant-shortcode.php';
 
@@ -35,11 +36,12 @@ function chatgpt_assistant_enqueue_assets(): void
     // Define an array of your plugin's page slugs
     $plugin_pages = array(
         'toplevel_page_chatgpt-assistant-settings',
-        'chatgpt-assistant_page_chatgpt-assistant-form'
+        'ai-content-generator_page_chatgpt-assistant-form',
+	    'ai-content-generator_page_chatgpt-assistant-new-post'
     );
 
     // Check if the current screen is in your plugin's pages
-    if ($screen->id == 'chatgpt-assistant_page_chatgpt-assistant-messages') {
+    if ($screen->id == 'ai-content-generator_page_chatgpt-assistant-messages') {
         // Enqueue Bootstrap CSS
         wp_enqueue_style('bootstrap', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css', array(), '4.5.2');
 
@@ -54,10 +56,10 @@ function chatgpt_assistant_enqueue_assets(): void
     // Check if the current screen is in your plugin's pages
     if (in_array($screen->id, $plugin_pages)) {
         // Enqueue Bootstrap CSS
-        wp_enqueue_style('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css', array(), '5.3.0');
+        wp_enqueue_style('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css', array(), '5.3.1');
 
         // Enqueue Bootstrap JS
-        wp_enqueue_script('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js', array('jquery'), '5.3.0');
+        wp_enqueue_script('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js', array(), '5.3.1');
 
         wp_enqueue_script('jquery');
         wp_enqueue_script('twbs', 'https://cdnjs.cloudflare.com/ajax/libs/twbs-pagination/1.4.2/jquery.twbsPagination.min.js');

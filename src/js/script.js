@@ -424,3 +424,46 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+
+    // JavaScript code using Bootstrap to handle the tab navigation
+    const triggerTabList = document.querySelectorAll('#unordered-message-tab button');
+    const activeTabKey = 'activeTab';
+
+    // Function to store the active tab ID in LocalStorage
+    function storeActiveTab(tabId) {
+        sessionStorage.setItem(activeTabKey, tabId);
+    }
+
+    // Function to retrieve the active tab ID from LocalStorage
+    function getActiveTab() {
+        return sessionStorage.getItem(activeTabKey);
+    }
+
+    triggerTabList.forEach(triggerEl => {
+        const tabTrigger = new bootstrap.Tab(triggerEl);
+
+        triggerEl.addEventListener('click', event => {
+            event.preventDefault();
+            tabTrigger.show();
+            storeActiveTab(triggerEl.getAttribute('id'));
+        });
+    });
+
+    const activeTabId = getActiveTab();
+    if (activeTabId) {
+        const activeTabEl = document.querySelector(`#${activeTabId}`);
+        if (activeTabEl) {
+            const tabTrigger = new bootstrap.Tab(activeTabEl);
+            tabTrigger.show();
+        }
+    } else {
+        const activeTabEl = document.querySelector(`#basic-message-tab-link`);
+        const tabTrigger = new bootstrap.Tab(activeTabEl);
+        tabTrigger.show();
+    }
+
+});
+
