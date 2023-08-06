@@ -72,7 +72,11 @@ function chatgpt_assistant_new_post_page(): void {
                                 <input type="text" class="form-control" id="postTitleTextInput" placeholder="Post Title">
                             </div>
                             <div class="col-auto">
-                                <button class="btn btn-primary mb-3" onclick="sendMessageAPI('postTitleTextInput')" <?php echo $buttons_disabled; ?>>Generate title</button>
+                                <button id="postTitleTextInput_button" class="btn btn-primary mb-3" onclick="sendMessageAPI('postTitleTextInput')" <?php echo $buttons_disabled; ?>>Generate title</button>
+                                <button id="postTitleTextInput_load" class="btn btn-primary mb-3 d-none" type="button" disabled>
+                                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                                    <span role="status">Loading...</span>
+                                </button>
                                 <button class="btn btn-danger mb-3" onclick="deleteSettingsAjax('postTitleTextInput')">Delete</button>
                             </div>
                         </div>
@@ -84,7 +88,11 @@ function chatgpt_assistant_new_post_page(): void {
                                 <textarea class="form-control" id="postDescriptionTextarea" rows="3" placeholder="Post Description"></textarea>
                             </div>
                             <div class="mb-3 col-auto mn-width-400">
-                                <button class="btn btn-primary mb-3" onclick="sendMessageAPI('postDescriptionTextarea')" <?php echo $buttons_disabled; ?>>Generate description</button>
+                                <button id="postDescriptionTextarea_button" class="btn btn-primary mb-3" onclick="sendMessageAPI('postDescriptionTextarea')" <?php echo $buttons_disabled; ?>>Generate description</button>
+                                <button id="postDescriptionTextarea_load" class="btn btn-primary mb-3 d-none" type="button" disabled>
+                                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                                    <span role="status">Loading...</span>
+                                </button>
                                 <button class="btn btn-danger mb-3" onclick="deleteSettingsAjax('postDescriptionTextarea')">Delete</button>
                             </div>
                         </div>
@@ -200,7 +208,8 @@ function chatgpt_assistant_new_post_page(): void {
                         <h3>Post Description</h3>
                     </div>
                     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-                        <input type="hidden" name="action" value="my_form_submission">
+                        <input type="hidden" name="action" value="publish_post_from_form">
+                        <input id="responseDataRaw" type="hidden" name="responseDataRaw">
                         <?php
                             settings_fields('chatgpt_assistant_settings');
                             do_settings_sections('chatgpt_assistant_settings');
@@ -243,36 +252,6 @@ function chatgpt_assistant_new_post_page(): void {
 
 }
 
-function my_plugin_save_settings() {
-    if (isset($_POST['chatpgt_assistant_post_title']) && isset($_POST['chatpgt_assistant_editor'])) {
-        // Sanitize and prepare the data
-        $post_title = sanitize_text_field($_POST['chatpgt_assistant_post_title']);
-        $editor_content = wp_kses_post($_POST['chatpgt_assistant_editor']);
-
-        // Create the post array
-        $new_post = array(
-            'post_title'   => $post_title,
-            'post_content' => $editor_content,
-            'post_status'  => 'publish', // You can use 'draft' if you want to save it as a draft first.
-            'post_type'    => 'post', // Change to your custom post type if needed.
-        );
-
-        // Insert the post into the database
-        $post_id = wp_insert_post($new_post);
-
-        // Optionally, you can redirect the user to the newly created post's edit page.
-        if ($post_id) {
-            $edit_post_link = get_edit_post_link($post_id);
-            if ($edit_post_link) {
-                wp_redirect($edit_post_link);
-                exit;
-            }
-        }
-    }
-}
-add_action('admin_init', 'my_plugin_save_settings');
-
-
 // Define the function to handle the form submission and publish a post
 function publish_post_from_form()
 {
@@ -295,8 +274,27 @@ function publish_post_from_form()
             // Insert the post into the database
             $post_id = wp_insert_post($post_data);
 
+            global $wpdb;
+
+            // Create a new post with the assistant's reply and the chosen post title
+            $table_name = $wpdb->prefix . 'chatgpt_message_history';
+            // Get the post object
+            $post = get_post($post_id);
+
+            $data = array(
+                'title' => $post_title,
+                'post_id' => $post_id,
+                'date' => $post->post_date,
+                'word_count' => str_word_count($editor_content),
+                'raw_response' => serialize(json_decode(stripslashes($_POST['responseDataRaw']), true))
+            );
+
             // Check if the post was successfully inserted
             if ($post_id) {
+
+                // Debug: return print_r($response_data);
+                $wpdb->insert($table_name, $data);
+
                 // Redirect to the newly created post's URL
                 $post_permalink = get_permalink($post_id);
                 wp_redirect($post_permalink);
@@ -309,8 +307,4 @@ function publish_post_from_form()
     }
 }
 
-// Hook the function to the 'admin_post' action hook for logged-in users
-add_action('admin_post_my_form_submission', 'publish_post_from_form');
-
-// Hook the function to the 'admin_post_nopriv' action hook for non-logged-in users
-add_action('admin_post_nopriv_my_form_submission', 'publish_post_from_form');
+add_action('admin_init', 'publish_post_from_form');

@@ -19,8 +19,6 @@ require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-upgrade-page.p
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-history.php';
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-new-post-page.php';
 
-require_once plugin_dir_path(__FILE__) . 'shortcode/chatgpt-assistant-shortcode.php';
-
 require_once plugin_dir_path(__FILE__) . 'chatgpt-assistant-menu.php';
 
 /**
@@ -88,7 +86,6 @@ function chatgpt_assistant_create_table(): void
     $sql = "CREATE TABLE $table_name (
         id INT(11) NOT NULL AUTO_INCREMENT,
         title VARCHAR(255) NOT NULL,
-        message TEXT NOT NULL,
         post_id INT(11) NOT NULL,
         date DATETIME NOT NULL,
         word_count INT(11) NOT NULL,
@@ -163,9 +160,6 @@ function chatgpt_assistant_generate_response(): void {
         )
     );
 
-    file_put_contents(get_home_path() . 'dump.txt', print_r($response, true));
-
-
     // Check if the API request was successful
     if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
         $error_message = 'Error: An error occurred while retrieving the assistant\'s response from OpenAI.';
@@ -198,7 +192,7 @@ function chatgpt_assistant_generate_response(): void {
             $error_message = 'Error: Body part of the message is empty. There is an error while separating title from post.';
             wp_send_json_error(array('error' => $error_message));
         } else {
-            wp_send_json_success(array('success' => true, 'response' => $assistant_message));
+            wp_send_json_success(array('success' => true, 'response' => $assistant_message, 'response_data' => $response_data));
         }
     } else {
         $error_message = 'Error: Invalid response data from OpenAI API.';

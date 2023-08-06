@@ -3,9 +3,13 @@ async function sendMessageAPI(location = null, message) {
 
     let systemMessage = 'Default system message.';
     let addToSettings = true;
+    let addToFormData = false;
 
     const targetInputArea = document.querySelector(`#${location}`);
     message = targetInputArea.value;
+
+    // show loading state
+    showHideLoadingState(location, true);
 
     switch (location) {
         case 'companyInfoTextarea':
@@ -38,7 +42,9 @@ async function sendMessageAPI(location = null, message) {
 
             const postTitleTextInput = document.querySelector('#postTitleTextInput')
 
-            addToSettings = false
+            addToSettings = false;
+            addToFormData = true;
+
             systemMessage = 'You are an expert on marketing and SEO. Please generate a wordpress post description with given title and consider wordpress guidelines. Post title: ' + postTitleTextInput.value
     }
 
@@ -56,6 +62,8 @@ async function sendMessageAPI(location = null, message) {
             body: formData,
         });
 
+        showHideLoadingState(location, false)
+
         if (!response.ok) {
             throw new Error('HTTP status ' + response.status + ', ' + response.statusText);
         }
@@ -68,6 +76,8 @@ async function sendMessageAPI(location = null, message) {
             targetInputArea.value = responseMessage;
             sessionStorage.setItem(location, responseMessage);
 
+            if(addToFormData) messageHistoryPrepare(JSON.stringify(responseData.data.response_data));
+
             if (addToSettings) {
                 const settingsFormData = new FormData();
                 settingsFormData.append('action', 'chatgpt_assistant_setting_action_callback');
@@ -79,72 +89,101 @@ async function sendMessageAPI(location = null, message) {
         }
 
     } catch (error) {
+        showHideLoadingState(location, false)
         throw error;
+    }
+
+}
+
+function messageHistoryPrepare(responseData) {
+    const responseDataInput = document.querySelector(`#responseDataRaw`);
+
+    if (responseDataInput) {
+        responseDataInput.value = responseData
+        sessionStorage.setItem('responseDataRaw', responseData)
+    }
+}
+
+function showHideLoadingState(location, showOrNot) {
+
+    const targetInputAreaButton = document.querySelector(`#${location}_button`);
+    const targetInputAreaLoad = document.querySelector(`#${location}_load`);
+
+    if (showOrNot) {
+        targetInputAreaButton.classList.add('d-none');
+        targetInputAreaLoad.classList.remove('d-none');
+    } else {
+        targetInputAreaButton.classList.remove('d-none');
+        targetInputAreaLoad.classList.add('d-none');
     }
 
 }
 
 let stepper
 document.addEventListener('DOMContentLoaded', function () {
-    stepper = new Stepper(document.querySelector('.bs-stepper'), {
-        linear: false,
-        animation: true
-    })
 
-    let refreshOrNot = false;
+    const stepperDiv = document.querySelector('.bs-stepper');
 
-    if (window.performance && window.performance.navigation) {
-        switch (performance.navigation.type) {
-            case 0:
-                sessionStorage.setItem('activeStepIndex', '0');
-                refreshOrNot = false;
-                break;
-            case 1:
-                refreshOrNot = true;
-                break;
+    if(stepperDiv) {
+        stepper = new Stepper(stepperDiv, {
+            linear: false,
+            animation: true
+        })
+
+        let refreshOrNot = false;
+
+        if (window.performance && window.performance.navigation) {
+            switch (performance.navigation.type) {
+                case 0:
+                    sessionStorage.setItem('activeStepIndex', '0');
+                    refreshOrNot = false;
+                    break;
+                case 1:
+                    refreshOrNot = true;
+                    break;
+            }
         }
-    }
 
-    const stepperHeader = document.querySelector('.bs-stepper-header');
-    const steps = stepperHeader.querySelectorAll('.step');
+        const stepperHeader = document.querySelector('.bs-stepper-header');
+        const steps = stepperHeader.querySelectorAll('.step');
 
-    // Get the active step from session storage or set it to 0 (the index of the first step)
-    let activeStepIndex = sessionStorage.getItem('activeStepIndex');
-    if (!activeStepIndex) {
-        activeStepIndex = '0';
-        sessionStorage.setItem('activeStepIndex', activeStepIndex);
-    }
+        // Get the active step from session storage or set it to 0 (the index of the first step)
+        let activeStepIndex = sessionStorage.getItem('activeStepIndex');
+        if (!activeStepIndex) {
+            activeStepIndex = '0';
+            sessionStorage.setItem('activeStepIndex', activeStepIndex);
+        }
 
-    // Add the 'active' class to the initial active step
-    steps[parseInt(activeStepIndex)].classList.add('active');
+        // Add the 'active' class to the initial active step
+        steps[parseInt(activeStepIndex)].classList.add('active');
 
-    const buildingPostStep = document.querySelector('#building_the_post_step');
-    const descPostStep = document.querySelector('#description_post_step');
+        const buildingPostStep = document.querySelector('#building_the_post_step');
+        const descPostStep = document.querySelector('#description_post_step');
 
-    if (activeStepIndex === '0') {
-        buildingPostStep.classList.remove('dstepper-none');
-        buildingPostStep.classList.add('dstepper-block');
-        buildingPostStep.classList.add('active');
-    } else {
-        descPostStep.classList.remove('dstepper-none');
-        descPostStep.classList.add('dstepper-block');
-        descPostStep.classList.add('active');
+        if (activeStepIndex === '0') {
+            buildingPostStep.classList.remove('dstepper-none');
+            buildingPostStep.classList.add('dstepper-block');
+            buildingPostStep.classList.add('active');
+        } else {
+            descPostStep.classList.remove('dstepper-none');
+            descPostStep.classList.add('dstepper-block');
+            descPostStep.classList.add('active');
 
-        steps[0].classList.remove('active');
+            steps[0].classList.remove('active');
 
-        buildingPostStep.classList.remove('dstepper-block');
-        buildingPostStep.classList.add('dstepper-none');
-        buildingPostStep.classList.remove('active');
-    }
+            buildingPostStep.classList.remove('dstepper-block');
+            buildingPostStep.classList.add('dstepper-none');
+            buildingPostStep.classList.remove('active');
+        }
 
-    // Add click event listeners to the step buttons
-    steps.forEach((step, index) => {
-        step.addEventListener('click', () => {
-            // Update the active step index in session storage
-            sessionStorage.setItem('activeStepIndex', index);
+        // Add click event listeners to the step buttons
+        steps.forEach((step, index) => {
+            step.addEventListener('click', () => {
+                // Update the active step index in session storage
+                sessionStorage.setItem('activeStepIndex', index);
+            });
         });
-    });
-
+    }
 
 })
 
@@ -161,20 +200,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Get a list of all the input elements on the page
     const inputElementWrapper = document.querySelector('#chatgpt_assistant_new_post_wrapper');
+    const inputElementWrapperDesc = document.querySelector('#description_post_step');
 
-    if (!inputElementWrapper) {
-        console.error('#chatgpt_assistant_settings_wrapper not found.');
-        return;
+
+    if (inputElementWrapper) {
+        getAllInputValues(inputElementWrapper);
     }
 
-    getAllInputValues(inputElementWrapper);
+    if (inputElementWrapperDesc) {
+        getAllInputValues(inputElementWrapperDesc);
+    }
+
 
 });
 
 function getAllInputValues(inputElementWrapper) {
 
     if (!inputElementWrapper) {
-        console.error('#chatgpt_assistant_settings_wrapper not found.');
         return;
     }
 

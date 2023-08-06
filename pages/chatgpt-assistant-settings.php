@@ -67,7 +67,7 @@ function chatgpt_assistant_settings_page(): void
                 <h6>Company or Personal Information:</h6>
                 <label for="companyNameTextarea" class="form-label mx-width-perc-60">Company Name</label>
                 <div class="mb-3 col-auto mn-width-400">
-                    <input type="text" class="form-control" id="companyNameTextarea" placeholder="Example Company">
+                    <input type="text" class="form-control" id="companyNameTextarea" placeholder="Example Company" value="<?php echo get_option('companyNameTextarea'); ?>">
                 </div>
                 <div class="mb-3 col-auto mn-width-400">
                     <button class="btn btn-danger mb-3" onclick="deleteSettingsAjax('companyNameTextarea')">Delete</button>
@@ -79,7 +79,11 @@ function chatgpt_assistant_settings_page(): void
                     <textarea class="form-control" id="companyInfoTextarea" rows="4"><?php echo get_option('companyInfoTextarea'); ?></textarea>
                 </div>
                 <div class="mb-3 col-auto mn-width-400">
-                    <button class="btn btn-primary mb-3" onclick="sendMessageAPI('companyInfoTextarea')" >Generate</button>
+                    <button id="companyInfoTextarea_button" class="btn btn-primary mb-3" onclick="sendMessageAPI('companyInfoTextarea')" >Generate</button>
+                    <button id="companyInfoTextarea_load" class="btn btn-primary mb-3 d-none" type="button" disabled>
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        <span role="status">Loading...</span>
+                    </button>
                     <button class="btn btn-danger mb-3" onclick="deleteSettingsAjax('companyInfoTextarea')">Delete</button>
                 </div>
             </div>
@@ -91,7 +95,11 @@ function chatgpt_assistant_settings_page(): void
                     <textarea class="form-control" id="brandGuideTextarea" rows="4"><?php echo get_option('brandGuideTextarea'); ?></textarea>
                 </div>
                 <div class="mb-3 col-auto mn-width-400">
-                    <button class="btn btn-primary mb-3" onclick="sendMessageAPI('brandGuideTextarea')">Generate</button>
+                    <button id="brandGuideTextarea_button" class="btn btn-primary mb-3" onclick="sendMessageAPI('brandGuideTextarea')">Generate</button>
+                    <button id="brandGuideTextarea_load" class="btn btn-primary mb-3 d-none" type="button" disabled>
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        <span role="status">Loading...</span>
+                    </button>
                     <button class="btn btn-danger mb-3" onclick="deleteSettingsAjax('brandGuideTextarea')">Delete</button>
                 </div>
             </div>

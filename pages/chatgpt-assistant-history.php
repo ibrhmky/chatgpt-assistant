@@ -37,7 +37,6 @@ function chatgpt_assistant_messages_page(): void
             <caption><?php echo $total_messages ?> Messages</caption>
             <colgroup>
                 <col style="width: 3%">
-                <col style="width: 24%">
                 <col style="width: 28%">
                 <col style="width: 9%">
                 <col style="width: 15%">
@@ -47,11 +46,6 @@ function chatgpt_assistant_messages_page(): void
             <thead class="thead-dark">
             <tr>
                 <th scope='col'>No</th>
-                <th scope='col'>
-                    <a href="<?php echo esc_url(add_query_arg(array('orderby' => 'message', 'order' => ((isset($_GET['orderby']) && $_GET['orderby'] == 'message') && (isset($_GET['order']) && $_GET['order'] == 'asc')) ? 'desc' : 'asc'))); ?>">
-                        Message <?php echo ($_GET['orderby'] ?? '') == 'message' && ($_GET['order'] ?? '') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>'; ?>
-                    </a>
-                </th>
                 <th scope='col'>
                     <a href="<?php echo esc_url(add_query_arg(array('orderby' => 'title', 'order' => ((isset($_GET['orderby']) && $_GET['orderby'] == 'title') && (isset($_GET['order']) && $_GET['order'] == 'asc')) ? 'desc' : 'asc'))); ?>">
                         Title <?php echo ($_GET['orderby'] ?? '') == 'title' && ($_GET['order'] ?? '') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>'; ?>
@@ -83,7 +77,6 @@ function chatgpt_assistant_messages_page(): void
                 $row_class = ($row_number % 2 == 0) ? 'even' : 'odd';
                 echo '<tr class="' . $row_class . '">';
                 echo '<td>' . $row_number . '</td>'; // Display row number
-                echo '<td>' . esc_html($message->message) . '</td>';
                 echo '<td>' . esc_html($message->title) . '</td>';
                 echo '<td class="text-center"><a href="'. get_admin_url() .'post.php?post=' . esc_html($message->post_id) . '&action=edit" target="_blank">' . esc_html($message->post_id) . '</a></td>';
                 echo '<td class="text-center">' . esc_html($message->date) . '</td>';
