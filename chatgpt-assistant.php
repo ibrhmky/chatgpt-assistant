@@ -15,7 +15,7 @@
 
 // Include the pages and other sections
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-settings.php';
-require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-message-page.php';
+require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-upgrade-page.php';
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-history.php';
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-new-post-page.php';
 
@@ -36,7 +36,7 @@ function chatgpt_assistant_enqueue_assets(): void
     // Define an array of your plugin's page slugs
     $plugin_pages = array(
         'toplevel_page_chatgpt-assistant-settings',
-        'ai-content-generator_page_chatgpt-assistant-form',
+        'ai-content-generator_page_chatgpt-assistant-upgrade',
 	    'ai-content-generator_page_chatgpt-assistant-new-post'
     );
 
@@ -57,9 +57,11 @@ function chatgpt_assistant_enqueue_assets(): void
     if (in_array($screen->id, $plugin_pages)) {
         // Enqueue Bootstrap CSS
         wp_enqueue_style('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css', array(), '5.3.1');
+        wp_enqueue_style('bs-stepper', 'https://cdn.jsdelivr.net/npm/bs-stepper/dist/css/bs-stepper.min.css');
 
         // Enqueue Bootstrap JS
         wp_enqueue_script('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js', array(), '5.3.1');
+        wp_enqueue_script('bs-stepper', 'https://cdn.jsdelivr.net/npm/bs-stepper/dist/js/bs-stepper.min.js');
 
         wp_enqueue_script('jquery');
         wp_enqueue_script('twbs', 'https://cdnjs.cloudflare.com/ajax/libs/twbs-pagination/1.4.2/jquery.twbsPagination.min.js');
@@ -113,16 +115,26 @@ function chatgpt_assistant_get_api_key()
 /**
  * Function to generate a response from ChatGPT and publish it as a post
  */
-function chatgpt_assistant_generate_response(): void
-{
-    // Retrieve the message from the request
-    $message = isset($_POST['message']) ? sanitize_text_field($_POST['message']) : '';
+function chatgpt_assistant_generate_response(): void {
+    // Retrieve the message and assistant mode from the request
+    $message = isset($_POST['message']) ? sanitize_textarea_field($_POST['message']) : '';
+    $system_message = isset($_POST['system_message']) ? sanitize_textarea_field($_POST['system_message']) : '';
+    $location_data = isset($_POST['location_data']) ? sanitize_textarea_field($_POST['location_data']) : '';
 
-    $bulk_input = isset($_POST['bulk_input']) ? sanitize_text_field($_POST['bulk_input']) : '';
+    $brand_guidelines = get_option('brandGuideTextarea');
+    $company_info = get_option('companyInfoTextarea');
+    $company_name = get_option('companyNameTextarea');
 
-    $assistant_mode = isset($_POST['assistantMode']) ? sanitize_text_field($_POST['assistantMode']) : '';
+    $quotation_marks = false;
 
-    $bulk_input_text = $bulk_input == 'false' ? '' : ' PS: This is bulk input mode, think of each message I will write independently of each other.';
+    switch ($location_data) {
+        case 'postTitleTextInput':
+            $message = 'You are a creative marketer for '.$company_info.' Your goal is to create a marketing post title that reflects our brand guidelines and company information. Our brand guidelines '.$brand_guidelines.' The title should establish trust, credibility for our products.';
+            $quotation_marks = true;
+            break;
+        case 'postDescriptionTextarea':
+            $message = 'Company Name: '.$company_name.'. You are a creative marketer for '.$company_info.' Your goal is to create a marketing post description for given title that reflects our brand guidelines and company information. Our brand guidelines '.$brand_guidelines.' The description should establish trust, credibility for our products.';
+    }
 
     $api_key = chatgpt_assistant_get_api_key();
     $model_id = 'gpt-3.5-turbo';
@@ -130,25 +142,29 @@ function chatgpt_assistant_generate_response(): void
     // Prepare the data for the API request
     $data = array(
         'messages' => array(
-            array('role' => 'system', 'content' => 'You are a WordPress author, and you are expert on ' . $assistant_mode . '. Please write the WordPress post like you are an expert. Choose a title for this post and separate title from post with "|" symbol and do not use "Title:". I want only one title no need for variations. Please SEO optimize the post. Surround important words with "<b>" and "</b>". Add HTML tags when it is needed. ' . $bulk_input_text),
-            array('role' => 'user', 'content' => $message)
+            array('role' => 'system', 'content' => $system_message), // Provide a default system message if $systemContent is empty
+            array('role' => 'user', 'content' =>  $message)
         ),
-        'model' => $model_id // Add the model parameter
+        'model' => $model_id,
+        'temperature' => 1.5,
     );
 
     // Send the API request
     $response = wp_remote_post(
         'https://api.openai.com/v1/chat/completions',
         array(
-            'timeout' => 30, // Increase the timeout value (in seconds)
+            'timeout' => 30,
             'method' => 'POST',
             'headers' => array(
                 'Authorization' => 'Bearer ' . $api_key,
                 'Content-Type' => 'application/json',
             ),
-            'body' => wp_json_encode($data)
+            'body' => wp_json_encode($data),
         )
     );
+
+    file_put_contents(get_home_path() . 'dump.txt', print_r($response, true));
+
 
     // Check if the API request was successful
     if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
@@ -162,61 +178,33 @@ function chatgpt_assistant_generate_response(): void
             }
         }
         wp_send_json_error(array('error' => $error_message));
+        
     }
 
     // Parse the API response
     $response_data = json_decode(wp_remote_retrieve_body($response), true);
 
-    // Extract the assistant's reply and the chosen post title from the response
-    $assistant_messages = $response_data['choices'][0]['message']['content'];
+    // Validate the API response data
+    if (is_array($response_data) && isset($response_data['choices']) && is_array($response_data['choices']) && count($response_data['choices']) > 0) {
+        // Extract the assistant's reply from the response
+        $assistant_message = $response_data['choices'][0]['message']['content'];
 
-    // Separate the title from the assistant's response using the "|" separator
-    $title_separator = '|';
-    $messages = explode($title_separator, $assistant_messages);
+        if($quotation_marks) {
+            // Removing quotation marks
+            $assistant_message = str_replace('"', '', $assistant_message);
+        }
 
-    $chosen_title = trim($messages[0]); // Extract the first part as the chosen title
-    $assistant_reply = trim($messages[1]); // Extract the second part as the body
-
-    if (!$assistant_reply) {
-        $error_message = 'Error: Body part of the message is empty. There is an error while separating title from post.';
+        if (!$assistant_message) {
+            $error_message = 'Error: Body part of the message is empty. There is an error while separating title from post.';
+            wp_send_json_error(array('error' => $error_message));
+        } else {
+            wp_send_json_success(array('success' => true, 'response' => $assistant_message));
+        }
+    } else {
+        $error_message = 'Error: Invalid response data from OpenAI API.';
         wp_send_json_error(array('error' => $error_message));
     }
 
-    // Create a new post with the assistant's reply and the chosen post title
-    $post_data = array(
-        'post_title' => $chosen_title,
-        'post_content' => $assistant_reply,
-        'post_status' => 'publish',
-        'post_author' => 1, // Replace with the desired author ID
-        'post_type' => 'post',
-    );
-
-    $post_id = wp_insert_post($post_data);
-
-    global $wpdb;
-
-    // Create a new post with the assistant's reply and the chosen post title
-    $table_name = $wpdb->prefix . 'chatgpt_message_history';
-    // Get the post object
-    $post = get_post($post_id);
-
-    $data = array(
-        'title' => $chosen_title,
-        'message' => $message,
-        'post_id' => $post_id,
-        'date' => $post->post_date,
-        'word_count' => str_word_count($assistant_reply),
-        'raw_response' => serialize($response_data)
-    );
-
-    if ($post_id) {
-        // Debug: return print_r($response_data);
-        $wpdb->insert($table_name, $data);
-
-        wp_send_json_success(array('success' => true, 'response' => '<span>Success: The assistant\'s reply has been published as a post with ID: <a href="'. get_admin_url() .'post.php?post='.$post_id.'&action=edit" target="_blank">'.$post_id.'</a></span>'));
-    } else {
-        wp_send_json_error(array('success' => false, 'error' => 'Error: An error occurred while publishing the assistant\'s reply.'));
-    }
 }
 
 add_action('wp_ajax_chatgpt_assistant_generate_response', 'chatgpt_assistant_generate_response');

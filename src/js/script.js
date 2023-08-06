@@ -1,124 +1,276 @@
 // Wait for the DOM to be fully loaded
-async function sendMessageAPI(message = null, listItem = null) {
+async function sendMessageAPI(location = null, message) {
 
-    // Get the form and response element
-    const responseElement = document.getElementById('chatgpt-assistant-response');
+    let systemMessage = 'Default system message.';
+    let addToSettings = true;
 
-    const bulkInputButton = document.getElementById("bulk-input-button");
-    let bulkInputMode = false;
-    let bulkMessage = '';
+    const targetInputArea = document.querySelector(`#${location}`);
+    message = targetInputArea.value;
 
-    let isDone = false;
+    switch (location) {
+        case 'companyInfoTextarea':
 
-    if (bulkInputButton) {
-        bulkInputMode = bulkInputButton.classList.contains("btn-danger");
+            systemMessage = 'You are an expert on creating company info. Use given message and look professional about this. Make it 2 sentences max.';
+
+            if(!message) {
+                message = 'Create a fiction company and make short info about the company. Make it 2 sentences max.'
+            }
+            break;
+        case 'brandGuideTextarea':
+
+            systemMessage = 'You are an expert on creating company brand guidelines. Use given message and look professional about this. Make it 2 sentences max.';
+
+            const companyInfoValue = document.querySelector(`#companyInfoTextarea`).value;
+
+            if(!message && !companyInfoValue) {
+                message = 'Create a fiction company and make short brand guideline for the company. Make it 2 sentences max.'
+            } else if (!message){
+                message = 'Company info: ' + companyInfoValue + ' Create a brand guideline for the company. Make it 2 sentences max.'
+            }
+            break;
+        case 'postTitleTextInput':
+
+            addToSettings = false
+            systemMessage = 'You are an expert marketer. Please generate a wordpress post title and consider wordpress guidelines.'
+            break;
+
+        case 'postDescriptionTextarea':
+
+            const postTitleTextInput = document.querySelector('#postTitleTextInput')
+
+            addToSettings = false
+            systemMessage = 'You are an expert on marketing and SEO. Please generate a wordpress post description with given title and consider wordpress guidelines. Post title: ' + postTitleTextInput.value
     }
-
-    const expertiseButton = document.getElementById("assistant_mode");
-
-    let expertiseSelection = '';
-
-    // Get the message value
-    if (expertiseButton) {
-        expertiseSelection = document.getElementById('assistant_mode').value;
-    }
-
-    // Get the message value
-    if (!message && bulkInputMode) {
-        return;
-    }
-
-    if (bulkInputMode) {
-
-        // Remove the previous status class
-        listItem.classList.remove("list-group-item-secondary");
-
-        // Update the class for the next message
-        listItem.classList.add("list-group-item-warning");
-    }
-
-    // Get the message value
-    if (!message && !bulkInputMode) {
-        message = document.getElementById('chatgpt-assistant-message').value;
-    }
-
-    responseElement.style.display = 'none';
-
-    const bulkInputText = bulkInputMode ? 'true' : 'false';
 
     // Prepare the data to be sent
-    const data = new URLSearchParams();
-    data.append('action', 'chatgpt_assistant_generate_response');
-    data.append('message', message);
-    data.append('bulk_input', bulkInputText);
-    data.append('assistantMode', expertiseSelection);
+    const formData = new FormData();
+    formData.append('action', 'chatgpt_assistant_generate_response');
+    formData.append('message', message);
+    formData.append('system_message', systemMessage);
+    formData.append('location_data', location)
 
-    if (!message) {
-        hideLoadingState();
-        responseElement.innerHTML = 'An error occurred while retrieving the assistant\'s response: <b>Message is null</b>'
-        responseElement.className = 'alert alert-danger';
-        responseElement.style.display = 'block';
+    // Send the data to the server
+    try {
+        const response = await fetch(ajaxurl, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error('HTTP status ' + response.status + ', ' + response.statusText);
+        }
+
+        const responseData = await response.json();
+
+        // Handle the response data
+        if (responseData.success) {
+            const responseMessage = responseData.data.response;
+            targetInputArea.value = responseMessage;
+            sessionStorage.setItem(location, responseMessage);
+
+            if (addToSettings) {
+                const settingsFormData = new FormData();
+                settingsFormData.append('action', 'chatgpt_assistant_setting_action_callback');
+                settingsFormData.append('setting_value', targetInputArea.value);
+                settingsFormData.append('setting_key', targetInputArea.id);
+
+                await settingsAjaxRequest(settingsFormData, true);
+            }
+        }
+
+    } catch (error) {
+        throw error;
+    }
+
+}
+
+let stepper
+document.addEventListener('DOMContentLoaded', function () {
+    stepper = new Stepper(document.querySelector('.bs-stepper'), {
+        linear: false,
+        animation: true
+    })
+
+    let refreshOrNot = false;
+
+    if (window.performance && window.performance.navigation) {
+        switch (performance.navigation.type) {
+            case 0:
+                sessionStorage.setItem('activeStepIndex', '0');
+                refreshOrNot = false;
+                break;
+            case 1:
+                refreshOrNot = true;
+                break;
+        }
+    }
+
+    const stepperHeader = document.querySelector('.bs-stepper-header');
+    const steps = stepperHeader.querySelectorAll('.step');
+
+    // Get the active step from session storage or set it to 0 (the index of the first step)
+    let activeStepIndex = sessionStorage.getItem('activeStepIndex');
+    if (!activeStepIndex) {
+        activeStepIndex = '0';
+        sessionStorage.setItem('activeStepIndex', activeStepIndex);
+    }
+
+    // Add the 'active' class to the initial active step
+    steps[parseInt(activeStepIndex)].classList.add('active');
+
+    const buildingPostStep = document.querySelector('#building_the_post_step');
+    const descPostStep = document.querySelector('#description_post_step');
+
+    if (activeStepIndex === '0') {
+        buildingPostStep.classList.remove('dstepper-none');
+        buildingPostStep.classList.add('dstepper-block');
+        buildingPostStep.classList.add('active');
+    } else {
+        descPostStep.classList.remove('dstepper-none');
+        descPostStep.classList.add('dstepper-block');
+        descPostStep.classList.add('active');
+
+        steps[0].classList.remove('active');
+
+        buildingPostStep.classList.remove('dstepper-block');
+        buildingPostStep.classList.add('dstepper-none');
+        buildingPostStep.classList.remove('active');
+    }
+
+    // Add click event listeners to the step buttons
+    steps.forEach((step, index) => {
+        step.addEventListener('click', () => {
+            // Update the active step index in session storage
+            sessionStorage.setItem('activeStepIndex', index);
+        });
+    });
+
+
+})
+
+function nextStep() {
+    stepper.next()
+    document.querySelector('#chatpgt_assistant_post_title').value = document.querySelector('#postTitleTextInput').value
+
+    // Set the initial content in the editor's underlying textarea
+    tinyMCE.get('chatgpt_assistant_unique_editor').setContent(document.querySelector('#postDescriptionTextarea').value);
+
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Get a list of all the input elements on the page
+    const inputElementWrapper = document.querySelector('#chatgpt_assistant_new_post_wrapper');
+
+    if (!inputElementWrapper) {
+        console.error('#chatgpt_assistant_settings_wrapper not found.');
         return;
     }
 
+    getAllInputValues(inputElementWrapper);
+
+});
+
+function getAllInputValues(inputElementWrapper) {
+
+    if (!inputElementWrapper) {
+        console.error('#chatgpt_assistant_settings_wrapper not found.');
+        return;
+    }
+
+    const inputElements = inputElementWrapper.querySelectorAll('input, textarea');
+
+    const inputValues = {};
+    inputElements.forEach(inputElement => {
+        const inputId = inputElement.id;
+        inputValues[inputId] = inputElement.value;
+        if (!inputElement.value) {
+            inputElement.value = sessionStorage.getItem(inputId)
+        } else {
+          sessionStorage.setItem(inputId, inputElement.value)
+        }
+
+        if (!sessionStorage.getItem(inputId)) inputElement.value = '';
+    });
+
+    return inputValues;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Get a list of all the input elements on the page
+    const inputElementWrapper = document.querySelector('#chatgpt_assistant_settings_wrapper');
+
+    async function handleChildBlur(event) {
+
+        const inputElement = event.target;
+
+        // Get the value of the input field
+        const inputValue = inputElement.value;
+
+        if(!inputValue) return;
+
+        sessionStorage.setItem(inputElement.id, inputValue)
+
+        // Create a new FormData object to hold the data to be sent
+        const formData = new FormData();
+        formData.append('action', 'chatgpt_assistant_setting_action_callback');
+        formData.append('setting_value', inputValue);
+        formData.append('setting_key', inputElement.id);
+
+        // save settings
+        await settingsAjaxRequest(formData, true)
+
+    }
+
+    if (inputElementWrapper) {
+        inputElementWrapper.addEventListener('focusout', handleChildBlur);
+        getAllInputValues(inputElementWrapper);
+    }
+
+});
+
+async function settingsAjaxRequest(formData, saveOrNot) {
+
     // Send the data to the server
-    await fetch(ajaxurl, {
-        method: 'POST',
-        body: data.toString(),
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-        },
-    })
-        .then(function (response) {
-
-            if (!response.ok) {
-                if (!bulkInputMode) {
-                    hideLoadingState();
-                    throw new Error('HTTP status ' + response.status + ', ' + response.statusText);
-                } else {
-                    bulkMessage = [response.statusText, false];
-                }
-            }
-            isDone = true;
-            return response.json();
-        })
-        .then(function (data) {
-
-            // Handle the response data
-            if (data.success) {
-                if (!bulkInputMode) {
-                    hideLoadingState();
-                    responseElement.innerHTML = data.data.response;
-                    responseElement.className = 'alert alert-success';
-                } else {
-                    bulkMessage = [data.data.response, true];
-                }
-            } else {
-                if (!bulkInputMode) {
-                    hideLoadingState();
-                    responseElement.textContent = data.error;
-                    responseElement.className = 'alert alert-danger';
-                } else {
-                    bulkMessage = [data.data.response, false];
-                }
-            }
-            responseElement.style.display = 'block';
-            isDone = true;
-        })
-        .catch(function (error) {
-
-            if (!bulkInputMode) {
-                hideLoadingState();
-                responseElement.textContent = 'An error occurred while retrieving the assistant\'s response: ' + error.message;
-                responseElement.className = 'alert alert-danger';
-                responseElement.style.display = 'block';
-            } else {
-                bulkMessage = [error.message, false];
-            }
-            isDone = true;
+    try {
+        const response = await fetch(ajaxurl, {
+            method: 'POST',
+            body: formData,
         });
 
-    return bulkMessage;
+        if (!response.ok) {
+            throw new Error('HTTP status ' + response.status + ', ' + response.statusText);
+        }
+
+        const responseData = await response.json();
+
+        // Handle the response data
+        if (responseData.success) {
+            // Show a toast message to inform the user that the setting has been saved
+            let toastElement = saveOrNot ? document.querySelector('.toast-delete') : document.querySelector('.toast-save');
+            let toast = new bootstrap.Toast(toastElement);
+            await toast.show();
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function deleteSettingsAjax(location) {
+
+    // Create a new FormData object to hold the data to be sent
+    const formData = new FormData();
+    formData.append('action', 'chatgpt_assistant_setting_remove_callback');
+    formData.append('setting_key', location);
+
+    sessionStorage.removeItem(location)
+
+    document.querySelector(`#${location}`).value = '';
+
+    // delete settings
+    await settingsAjaxRequest(formData, false)
+
 }
 
 // Wait for the DOM to be fully loaded
@@ -149,6 +301,9 @@ document.addEventListener("DOMContentLoaded", function() {
     // Get the submit button element
     const submitButton = document.getElementById("chatgpt_assistant_submit_button");
 
+    // Get the submit button element
+    const deleteButton = document.getElementById("chatgpt_assistant_delete_button");
+
     if (editButton) { // Add click event listener to the Edit button
         editButton.addEventListener("click", function () {
             // Enable the input field
@@ -159,8 +314,70 @@ document.addEventListener("DOMContentLoaded", function() {
 
             // Hide the Edit button
             editButton.style.display = "none";
+
+            // Hide the Delete button
+            deleteButton.style.display = "none";
         });
     }
+
+    if (deleteButton) {
+        deleteButton.addEventListener("click", function() {
+            // Create a new FormData object to hold the data to be sent
+            const formData = new FormData();
+            formData.append('action', 'chatgpt_assistant_remove_api_key');
+
+            // Send an AJAX request to the server to remove the API key
+            fetch(ajaxurl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+                },
+            })
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('HTTP status ' + response.status + ', ' + response.statusText);
+                    }
+                    // Rest of the code...
+                    // API key removal successful, update the UI accordingly
+                    const apiKeyInput = document.getElementById("chatgpt_assistant_api_key");
+                    apiKeyInput.value = '';
+                    apiKeyInput.removeAttribute('disabled');
+                    const editButton = document.getElementById("chatgpt_assistant_edit_button");
+                    const submitButton = document.getElementById("chatgpt_assistant_submit_button");
+                    editButton.style.display = "none";
+                    submitButton.style.display = "block";
+                    deleteButton.style.display = "none";
+
+                    // Show the success message
+                    const successMessage = document.getElementById('api-key-removed-message');
+                    if (successMessage) {
+                        successMessage.style.display = 'block';
+                    }
+                    // Show the success message
+                    const invalidMessage = document.getElementById('api-key-invalid-message');
+                    if (invalidMessage) {
+                        invalidMessage.style.display = 'none';
+                    }
+                    // Show the success message
+                    const savedMessage = document.getElementById('api-key-saved-message');
+                    if (savedMessage) {
+                        savedMessage.style.display = 'none';
+                    }
+                    // Show the success message
+                    const infoMessage = document.getElementById('api-key-saved-info');
+                    if (infoMessage) {
+                        infoMessage.style.display = 'none';
+                    }
+                })
+                .catch(function(error) {
+                    // Handle any error during API key removal (if needed)
+                    console.error('Error removing API key:', error);
+                });
+        });
+
+    }
+
 });
 
 // Function to toggle the response visibility
@@ -268,202 +485,56 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const form = document.getElementById("chatgpt-assistant-form");
     const submitButton = document.getElementById("submit-chatgpt-message");
-    const bulkInputButton = document.getElementById("bulk-input-button");
     const responseDiv = document.getElementById("chatgpt-assistant-response");
     const textarea = document.getElementById("chatgpt-assistant-message");
-    const messageList = document.getElementById("message-list");
 
-    let bulkInputMode = false;
+    if (form) {
+        form.addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent form submission
 
-    if (bulkInputButton) {
+            const messages = extractMessagesFromTextarea();
 
-        bulkInputButton.addEventListener("click", function() {
-            bulkInputMode = !bulkInputMode;
-
-            messageList.innerHTML = '';
-
-            if (bulkInputMode) {
-                bulkInputButton.classList.add("btn-danger");
-                bulkInputButton.innerHTML = "Cancel Bulk Input";
-            } else {
-                bulkInputButton.classList.remove("btn-danger");
-                bulkInputButton.innerHTML = "Bulk Input";
+            if (messages.length === 0) {
+                responseDiv.innerHTML = "Please enter at least one message.";
+                responseDiv.style.display = "block";
+                return;
             }
 
-            const messageTextarea = document.getElementById("chatgpt-assistant-message");
-            const responseDiv = document.getElementById("chatgpt-assistant-response");
+            // Disable the submit button and bulk input button
+            submitButton.setAttribute("disabled", "true");
+            submitButton.classList.add("disabled");
 
-            if (bulkInputMode) {
-                messageTextarea.placeholder = "Type your messages here, each on a new line...";
-                responseDiv.style.display = "inline-block";
-                responseDiv.innerHTML = "Bulk input mode has been activated. Every line you entered will be a new message.";
-            } else {
-                messageTextarea.placeholder = "Type your message here...";
-                responseDiv.style.display = "none";
-            }
+            // Show the loader
+            const loader = document.getElementById("submit-btn-loader");
+            loader.classList.remove("d-none");
 
-            if (form && bulkInputMode) {
-                form.addEventListener("submit", function(event) {
-                    event.preventDefault(); // Prevent form submission
-
-                    const messages = extractMessagesFromTextarea();
-
-                    if (messages.length === 0) {
-                        responseDiv.innerHTML = "Please enter at least one message.";
-                        responseDiv.style.display = "block";
-                        return;
-                    }
-
-                    // Disable the submit button and bulk input button
-                    submitButton.setAttribute("disabled", "true");
-                    submitButton.classList.add("disabled");
-                    bulkInputButton.setAttribute("disabled", "true");
-                    bulkInputButton.classList.add("disabled");
-
-                    // Show the loader
-                    const loader = document.getElementById("submit-btn-loader");
-                    loader.classList.remove("d-none");
-
-                    // Append all messages to the list
-                    messages.forEach((message, index) => {
-                        const listItem = document.createElement("li");
-                        listItem.classList.add("list-group-item", "list-group-item-secondary");
-                        listItem.textContent = message;
-                        listItem.id = 'assistant_message_list_' + index;
-                        messageList.appendChild(listItem);
-
-                    });
-
-                    // Process messages
-                    processMessages(messages);
-
-                });
-            }
         });
     }
 
     function extractMessagesFromTextarea() {
         const inputValue = textarea.value.trim();
-        console.log("extract the message")
-        return bulkInputMode ? inputValue.split("\n").map(message => message.trim()) : [inputValue];
+        return [inputValue];
     }
 
-    async function processMessages(messages) {
-
-        const promises = [];
-
-        for (const message of messages) {
-
-            const index = messages.indexOf(message);
-
-            const listItem = document.getElementById('assistant_message_list_' + index);
-
-            const promise = sendMessageAPI(message, listItem).then((apiResponse) => {
-
-                if (!apiResponse) return;
-
-                const apiResponseText = apiResponse[0];
-                const apiResponseErrorCheck = apiResponse[1];
-
-                if (!apiResponseErrorCheck) {
-
-                    // Remove the previous status class
-                    listItem.classList.remove("list-group-item-warning");
-
-                    // Update the class for the next message
-                    listItem.classList.add("list-group-item-danger");
-
-                    // Update list item text
-                    listItem.textContent += ' - ' + apiResponseText;
-
-                    return;
-                }
-
-                if (apiResponse) {
-
-                    // Remove the previous status class
-                    listItem.classList.remove("list-group-item-warning");
-
-                    // Update the class for the next message
-                    listItem.classList.add("list-group-item-success");
-
-                    // Update list item text
-                    listItem.innerHTML = listItem.textContent + ' - ' + apiResponseText;
-
-                }
-
-            });
-
-            promises.push(promise);
-
-        }
-
-        await Promise.all(promises);
-
-        // Enable the submit button and bulk input button
-        submitButton.removeAttribute("disabled");
-        submitButton.classList.remove("disabled");
-        bulkInputButton.removeAttribute("disabled");
-        bulkInputButton.classList.remove("disabled");
-
-        // Hide the loader
-        hideLoadingState();
-
-        // Clear the textarea
-        textarea.value = "";
-
-        // Show the response message
-        responseDiv.innerHTML = "Bulk input processing completed.";
-        responseDiv.style.display = "block";
-
-        textarea.addEventListener('focus', () => {
-            messageList.innerHTML = ''
-            responseDiv.innerHTML = "Bulk input mode has been activated. Every line you entered will be a new message.";
-        });
-
-    }
 });
 
-
-// Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
 
-    // JavaScript code using Bootstrap to handle the tab navigation
-    const triggerTabList = document.querySelectorAll('#unordered-message-tab button');
-    const activeTabKey = 'activeTab';
+    if (sessionStorage.getItem('warningDismissed') === '')
+        sessionStorage.setItem('warningDismissed', 'active');
 
-    // Function to store the active tab ID in LocalStorage
-    function storeActiveTab(tabId) {
-        sessionStorage.setItem(activeTabKey, tabId);
-    }
+    const warningClose = document.querySelector('#chatgpt_brand_warning_button');
 
-    // Function to retrieve the active tab ID from LocalStorage
-    function getActiveTab() {
-        return sessionStorage.getItem(activeTabKey);
-    }
-
-    triggerTabList.forEach(triggerEl => {
-        const tabTrigger = new bootstrap.Tab(triggerEl);
-
-        triggerEl.addEventListener('click', event => {
-            event.preventDefault();
-            tabTrigger.show();
-            storeActiveTab(triggerEl.getAttribute('id'));
+    if (warningClose) {
+        warningClose.addEventListener("click", function () {
+            sessionStorage.setItem('warningDismissed', 'passive')
         });
-    });
-
-    const activeTabId = getActiveTab();
-    if (activeTabId) {
-        const activeTabEl = document.querySelector(`#${activeTabId}`);
-        if (activeTabEl) {
-            const tabTrigger = new bootstrap.Tab(activeTabEl);
-            tabTrigger.show();
-        }
-    } else {
-        const activeTabEl = document.querySelector(`#basic-message-tab-link`);
-        const tabTrigger = new bootstrap.Tab(activeTabEl);
-        tabTrigger.show();
     }
+
+    const warningMessage = document.querySelector('#brand_warning_message');
+
+    if (sessionStorage.getItem('warningDismissed') === 'passive' && warningMessage)
+        warningMessage.style.display = 'none';
 
 });
 

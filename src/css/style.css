@@ -112,13 +112,17 @@ table.previous-messages td {
     max-width: fit-content !important;
 }
 
-#postTitleTextInput {
+#postTitleTextInput, #chatpgt_assistant_post_title, #companyNameTextarea {
     border-color: #dee2e6;
     color: #212529;
     background-color: white;
 }
 
-#postTitleTextInput:focus {
+#postTitleTextInput:focus, #chatpgt_assistant_post_title:focus, #companyNameTextarea:focus {
     border-color: #86b7fe;
     box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+}
+
+#chatgpt_assistant_unique_editor_ifr {
+    min-height: 400px;
 }
