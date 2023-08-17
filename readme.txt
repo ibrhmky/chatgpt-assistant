@@ -34,6 +34,30 @@ WooDev AI Content Generator empowers you to engage your website visitors like ne
 
 Embrace the future of user engagement and interaction with the Plugin Name. Elevate your website's functionality and provide users with a seamless, interactive, and informative experience that keeps them coming back for more.
 
+== Upgrade to Pro ==
+
+Looking to supercharge your AI-powered chat assistant? Upgrade to the Pro version for even more advanced features and capabilities:
+
+= Pro Features =
+
+- **Enhanced Expertise Modes:** Access additional expertise modes, expanding the range of topics and industries your chat assistant can provide expert-level insights on.
+
+- **Priority Support:** Get dedicated priority support from our expert team, ensuring your questions are answered promptly and issues are resolved efficiently.
+
+- **Custom Conversation Flows:** Create customized conversation flows and user interactions to achieve specific goals and outcomes on your website.
+
+- **Advanced Content Suggestions:** Unlock the ability to receive comprehensive content suggestions, allowing you to craft high-quality articles and posts effortlessly.
+
+- **User Behavior Insights:** Gain valuable insights into user behavior and preferences through advanced analytics and reporting tools.
+
+- **Premium Integrations:** Integrate the chat assistant seamlessly with popular third-party services and tools, expanding its functionality and versatility.
+
+= Learn More =
+
+Visit [woodev.net](https://woodev.net/product/ai-content-generator/) to learn more about the Pro version and discover how it can take your website's user engagement to the next level.
+
+Upgrade now: [AI Content Generator Pro](https://woodev.net/product/ai-content-generator/)
+
 == Installation ==
 
 1. Upload the `chatgpt-assistant` folder to the `/wp-content/plugins/` directory.
@@ -53,52 +77,21 @@ Yes, you can modify the CSS to style the chat assistant to match your website's 
 
 == Screenshots ==
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Screenshots are stored in the /assets directory.
-2. This is the second screen shot
+1. Settings page, you need to Open AI API Key and Company Info
+2. Add new post screen
+3. Before publish post you can edit here
+4. History of messages
 
 == Changelog ==
 
-= 1.0 =
-* A change since the previous version.
-* Another change.
-
-= 0.5 =
-* List versions from most recent at top to oldest at bottom.
+= 1.0.0 =
+* Initial release.
 
 == Upgrade Notice ==
 
-= 1.0 =
-Upgrade notices describe the reason a user should upgrade.  No more than 300 characters.
+= 1.0.0 =
+Initial release.
 
-= 0.5 =
-This version fixes a security related bug.  Upgrade immediately.
+== License ==
 
-== A brief Markdown Example ==
-
-Markdown is what the parser uses to process much of the readme file.
-
-[markdown syntax]: https://daringfireball.net/projects/markdown/syntax
-
-Ordered list:
-
-1. Some feature
-1. Another feature
-1. Something else about the plugin
-
-Unordered list:
-
-* something
-* something else
-* third thing
-
-Links require brackets and parenthesis:
-
-Here's a link to [WordPress](https://wordpress.org/ "Your favorite software") and one to [Markdown's Syntax Documentation][markdown syntax]. Link titles are optional, naturally.
-
-Blockquotes are email style:
-
-> Asterisks for *emphasis*. Double it up  for **strong**.
-
-And Backticks for code:
-
-`<?php code(); ?>`
+This plugin is released under the GPL-2.0-or-later license.
