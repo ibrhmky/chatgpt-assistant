@@ -1,4 +1,4 @@
-=== WooDev AI Content Generator ===
+=== AI Content Generator Marketing ===
 Contributors: ibrhmky
 Tags: ai, content generator, woodev, marketing
 Requires at least: 4.7
@@ -8,11 +8,11 @@ Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WooDev AI Content Generator is an AI-powered chat assistant for your WordPress website.
+AI Content Generator Marketing is an AI-powered chat assistant for your WordPress website.
 
 == Description ==
 
-WooDev AI Content Generator is a cutting-edge AI-powered chat assistant for your WordPress website, revolutionizing the way you interact with your users. Leveraging the advanced capabilities of OpenAI's GPT-3 technology, this plugin transforms your website into an interactive hub where users can engage in meaningful conversations, receive instant responses, and access relevant information.
+AI Content Generator Marketing is a cutting-edge AI-powered chat assistant for your WordPress website, revolutionizing the way you interact with your users. Leveraging the advanced capabilities of OpenAI's GPT-3 technology, this plugin transforms your website into an interactive hub where users can engage in meaningful conversations, receive instant responses, and access relevant information.
 
 = Key Features =
 
@@ -28,7 +28,7 @@ WooDev AI Content Generator is a cutting-edge AI-powered chat assistant for your
 
 = How It Works =
 
-WooDev AI Content Generator empowers you to engage your website visitors like never before. As users interact with the chat assistant, GPT-3 analyses their messages, comprehends the context, and generates insightful responses. Whether users seek information, assistance, or creative input, the plugin ensures they receive meaningful interactions that enhance their experience on your website.
+AI Content Generator Marketing empowers you to engage your website visitors like never before. As users interact with the chat assistant, GPT-3 analyses their messages, comprehends the context, and generates insightful responses. Whether users seek information, assistance, or creative input, the plugin ensures they receive meaningful interactions that enhance their experience on your website.
 
 = Stay Ahead with AI-Powered Conversations =
 
@@ -56,7 +56,7 @@ Looking to supercharge your AI-powered chat assistant? Upgrade to the Pro versio
 
 Visit [woodev.net](https://woodev.net/product/ai-content-generator/) to learn more about the Pro version and discover how it can take your website's user engagement to the next level.
 
-Upgrade now: [AI Content Generator Pro](https://woodev.net/product/ai-content-generator/)
+Upgrade now: [AI Content Generator Marketing Pro](https://woodev.net/product/ai-content-generator/)
 
 == Installation ==
 

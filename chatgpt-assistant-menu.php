@@ -6,8 +6,8 @@
     function chatgpt_assistant_add_menu(): void
     {
         add_menu_page(
-            'AI Content Generator',
-            'AI Content Generator',
+            'AI Content Generator Marketing',
+            'AI Content Generator Marketing',
             'manage_options',
             'chatgpt-assistant-settings',
             'chatgpt_assistant_settings_page',

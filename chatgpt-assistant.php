@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: WooDev AI Content Generator
+ * Plugin Name: AI Content Generator Marketing
  * Description: Integrates with OpenAI API to provide an AI-powered assistant.
  * Author: İbrahim KAYA
  * Author URI: https://woodev.net
