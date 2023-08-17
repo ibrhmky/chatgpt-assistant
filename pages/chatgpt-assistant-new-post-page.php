@@ -50,7 +50,7 @@ function chatgpt_assistant_new_post_page(): void {
                                 <li>&#9679; It is required, and help AI to support you while adding descriptions.</li>
                                 <li>&#9679; Please visit <a
                                             href="<?php echo esc_url(admin_url("admin.php?page=chatgpt-assistant-settings")); ?>">settings
-                                        page and fill Company Informations and Brand Guidelines.</a>.
+                                        page and fill Company Informations and Brand Guidelines.</a>
                                 </li>
                             </ul>
                             <button type="button" id="chatgpt_brand_warning_button" class="btn-close"

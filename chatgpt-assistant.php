@@ -15,7 +15,6 @@
 
 // Include the pages and other sections
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-settings.php';
-require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-upgrade-page.php';
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-history.php';
 require_once plugin_dir_path(__FILE__) . 'pages/chatgpt-assistant-new-post-page.php';
 
