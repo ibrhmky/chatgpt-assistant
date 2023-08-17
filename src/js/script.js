@@ -211,7 +211,6 @@ document.addEventListener('DOMContentLoaded', function() {
         getAllInputValues(inputElementWrapperDesc);
     }
 
-
 });
 
 function getAllInputValues(inputElementWrapper) {
@@ -371,7 +370,9 @@ document.addEventListener("DOMContentLoaded", function() {
             // Send an AJAX request to the server to remove the API key
             fetch(ajaxurl, {
                 method: 'POST',
-                body: formData,
+                body: new URLSearchParams({
+                    action: 'chatgpt_assistant_remove_api_key',
+                }),
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
                 },

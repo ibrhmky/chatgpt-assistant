@@ -1,14 +1,14 @@
 <?php
 /*
- * Plugin Name: AI Content Generator
+ * Plugin Name: WooDev AI Content Generator
  * Description: Integrates with OpenAI API to provide an AI-powered assistant.
  * Author: İbrahim KAYA
- * Author URI: https://ibrhmky.com
+ * Author URI: https://woodev.net
  * Version: 1.0.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * License: GPL v2 or later
- * License URI: https://www.gnu.org/licenses/gpl-3.0.html
+ * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * Text Domain: chatgpt-assistant
  * Domain Path: /languages
  */

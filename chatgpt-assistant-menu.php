@@ -60,18 +60,24 @@
     /**
      * Add a submenu item for the form
      */
-    function chatgpt_assistant_add_message_menu(): void
+    function chatgpt_assistant_upgrade_pro_menu(): void
     {
+
         add_submenu_page(
             'chatgpt-assistant-settings',
             'Upgrade to PRO',
             'Upgrade to PRO',
             'manage_options',
             'chatgpt-assistant-upgrade',
-            'chatgpt_assistant_upgrade_page'
+            function() {
+                $external_url = 'https://woodev.net/product/ai-content-generator/';
+                // Perform the redirection
+                wp_redirect($external_url);
+                exit;
+            }
         );
     }
-    add_action('admin_menu', 'chatgpt_assistant_add_message_menu');
+    add_action('admin_menu', 'chatgpt_assistant_upgrade_pro_menu');
 
     /**
      * Register the plugin settings

@@ -44,7 +44,7 @@ function chatgpt_assistant_settings_page(): void
                 <?php do_settings_sections('chatgpt_assistant_settings'); ?>
                 <div class="form-group">
                     <label for="chatgpt_assistant_api_key">OpenAI API Key</label>
-                    <input type="text" class="form-control" id="chatgpt_assistant_api_key"
+                    <input type="text" class="form-control mt-2" id="chatgpt_assistant_api_key"
                            name="chatgpt_assistant_api_key"
                            value="<?php echo esc_attr($api_key); ?>" <?php echo $is_api_key_set ? 'disabled' : ''; ?> />
                     <?php if ($is_api_key_set) : ?>
@@ -52,12 +52,13 @@ function chatgpt_assistant_settings_page(): void
                             it.</small>
                     <?php endif; ?>
                 </div>
-                <button type="submit" class="btn btn-primary" id="chatgpt_assistant_submit_button"
+                <button type="submit" class="btn btn-primary mt-3" id="chatgpt_assistant_submit_button"
                         name="chatgpt_assistant_submit" <?php echo $is_api_key_set ? 'style="display: none;"' : ''; ?>>
                     Save Settings
                 </button>
                 <?php if ($is_api_key_set) : ?>
                     <button type="button" class="btn btn-secondary mt-3" id="chatgpt_assistant_edit_button">Edit</button>
+                    <button type="button" class="btn btn-danger mt-3 ms-2" id="chatgpt_assistant_delete_button">Remove</button>
                 <?php endif; ?>
             </form>
         </div>
@@ -266,6 +267,7 @@ function chatgpt_assistant_remove_api_key() {
         if (current_user_can('manage_options')) {
             // Remove the API key option from the database
             delete_option('chatgpt_assistant_api_key');
+            echo "success"; // Sending a response back to the client to indicate success
         } else {
             // User doesn't have sufficient permissions to remove the API key
             echo "error"; // Sending a response back to the client to indicate error
