@@ -299,8 +299,8 @@ function chatgpt_assistant_setting_action_callback() {
     
 }
 // Register the my_update_setting_action AJAX action
-add_action('wp_ajax_chatgpt_assistant_setting_action_callback', 'chatgpt_assistant_setting_action_callback');
-add_action('wp_ajax_nopriv_chatgpt_assistant_setting_action_callback', 'chatgpt_assistant_setting_action_callback');
+add_action('wp_ajax_chatgpt_assistant_setting_action_callback', 'chatgpt_assistant_setting_save_callback' );
+add_action('wp_ajax_nopriv_chatgpt_assistant_setting_action_callback', 'chatgpt_assistant_setting_save_callback' );
 
 // Define the callback function for the my_update_setting_action AJAX action
 function chatgpt_assistant_setting_remove_callback() {
